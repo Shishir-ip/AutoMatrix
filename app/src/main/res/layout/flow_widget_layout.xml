@@ -40,7 +40,7 @@
             android:paddingHorizontal="10dp"
             android:paddingVertical="4dp"
             android:text="@string/widget_status_inactive"
-            android:textColor="#38BDF8"
+            android:textColor="#FFFFFF"
             android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -53,7 +53,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="@string/widget_subtext_default"
-        android:textColor="#94A3B8"
+        android:textColor="#9A9AA0"
         android:textSize="11sp" />
 
     <Space
@@ -78,7 +78,7 @@
             android:background="@drawable/widget_btn_bg"
             android:gravity="center"
             android:text="@string/mode_work"
-            android:textColor="#F1F5F9"
+            android:textColor="#F2F2F7"
             android:textSize="12sp"
             android:textStyle="bold" />
 
@@ -91,7 +91,7 @@
             android:background="@drawable/widget_btn_bg"
             android:gravity="center"
             android:text="@string/mode_study"
-            android:textColor="#F1F5F9"
+            android:textColor="#F2F2F7"
             android:textSize="12sp"
             android:textStyle="bold" />
 
@@ -104,7 +104,7 @@
             android:background="@drawable/widget_btn_bg"
             android:gravity="center"
             android:text="@string/mode_sleep"
-            android:textColor="#F1F5F9"
+            android:textColor="#F2F2F7"
             android:textSize="12sp"
             android:textStyle="bold" />
 
@@ -117,7 +117,7 @@
             android:background="@drawable/widget_btn_bg"
             android:gravity="center"
             android:text="@string/widget_btn_off"
-            android:textColor="#EF4444"
+            android:textColor="#F2F2F7"
             android:textSize="12sp"
             android:textStyle="bold" />
     </LinearLayout>

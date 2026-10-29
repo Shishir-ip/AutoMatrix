@@ -1,143 +1,111 @@
-# 🌊 FlowModes — Smart Focus Modes & Automation for Android
+# AutoMatrix
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Platform-Android_14+-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Platform" />
-  <img src="https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose" />
-  <img src="https://img.shields.io/badge/Kotlin-2.0+-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin" />
-  <img src="https://img.shields.io/badge/Architecture-MVI%20%2F%20Clean%20Flow-00C49F?style=for-the-badge" alt="Architecture" />
-  <img src="https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge" alt="License" />
+  <img src="https://img.shields.io/github/v/release/Shishir-ip/AutoMatrix?style=flat-square&label=Release&color=black" alt="Release" />
+  <img src="https://img.shields.io/badge/Platform-Android_7.0%2B-black?style=flat-square&logo=android&logoColor=white" alt="Platform" />
+  <img src="https://img.shields.io/badge/Kotlin-2.2-black?style=flat-square&logo=kotlin&logoColor=white" alt="Kotlin" />
+  <img src="https://img.shields.io/badge/Jetpack_Compose-Material_3-black?style=flat-square&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose" />
+  <img src="https://img.shields.io/badge/License-MIT-black?style=flat-square" alt="License" />
 </p>
 
-<p align="center">
-  <strong>Transform your Android device into an intelligent, contextual companion.</strong><br>
-  FlowModes delivers iOS Focus Modes meets Tasker power—wrapped in a fluid, ultra-responsive Material 3 Expressive UI.
-</p>
+<p align="center"><strong>Task automation and focus modes for Android. Free, offline, and open source.</strong></p>
+
+AutoMatrix turns your phone into an automated, distraction-free environment. Create **routines** (trigger → condition → action) and **focus modes** that reconfigure your device in one tap — silencing notifications, adjusting volume and brightness, enabling Do Not Disturb, and more. Everything runs **100% on your device**. No account, no cloud, no telemetry.
+
+Think of it as the middle ground between iOS Focus Modes and full automation suites like Tasker or MacroDroid — simple enough to set up in a minute, powerful enough for real workflows.
 
 ---
 
-## 🌟 Highlights & Capabilities
+## Features
 
-- 🎯 **Contextual Focus Modes** — Switch effortlessly between Focus, Deep Work, Driving, Sleep, Fitness, and custom modes.
-- 📲 **Quick Settings Tile (Android 14/15)** — Instant 1-tap mode cycling directly from the Android notification shade.
-- 📱 **Home Screen App Widget (4x2)** — Compact glassmorphic widget with one-tap toggle buttons for your favorite routines.
-- 🔔 **Dynamic Lock Screen & Notification Badging** — Persistent ongoing banner displaying active profile duration with quick "End Early" and "Mute 30m" actions.
-- 🏷️ **Physical NFC Tag Triggers & Writer** — Write & tap physical NFC stickers (e.g., desk sticker for "Deep Work", bedside for "Bedtime").
-- 📅 **Google Calendar Auto-Focus** — Automatically engages Focus Mode whenever an event marked "Busy", "Meeting", or "Workout" begins.
-- 📳 **Flip-to-Shhh & Shake Gestures** — Place phone face-down on a desk to immediately silence notifications or shake firmly for instant action.
-- ⚡ **Trigger-Condition-Action Automation Engine** — Chain Wi-Fi SSIDs, Bluetooth devices, Battery thresholds, Geo-Fencing, App Launches, and Time Schedules.
-- 🎨 **Material 3 Expressive Glass UI** — Custom fluid slider controls, organic glow accents, dark/light theme synergy, and 60/120fps stutter-free rendering.
-- 📦 **One-Tap Routine Templates** — Instant gallery for Work Focus, Bedtime Silence, Commute Navigator, Battery Saver Extreme, and Gamer Mode.
-- 📊 **Real-Time Execution Logs** — Complete history and visual debug telemetry showing triggered states, condition matches, and executed actions.
-- 🔒 **Privacy-First & Fully On-Device** — Zero telemetry trackers, no account required, all trigger matching runs securely on your hardware.
+**Focus Modes**
+- One-tap device profiles: Work, Study, Sleep, Driving, Gaming and custom modes
+- Persistent lock-screen banner with *End Early* and *Mute 30 min* actions
+- Quick Settings tile and a home-screen widget for instant switching
+- Automatic revert: settings restore when the mode ends
 
----
+**Routines (Automation)**
+- Triggers: time schedules, battery level, charging state, Wi-Fi networks, Bluetooth devices, headphone plug, screen on/off, boot completed, app launch (accessibility), NFC tags, calendar events
+- Conditions: combine triggers with All (AND) / Any (OR) logic and priorities
+- Actions: ringer mode, DND, media/ring volume, brightness, Wi-Fi, Bluetooth, launch app, notifications, and more — with restore-on-exit support
+- Ready-made template gallery: Sleep Mode, Morning Routine, Battery Saver, Commute, Security Guard and others
 
-## 📱 Screenshots & Visual Preview
+**Triggers without opening the app**
+- Flip to Shhh — place the phone face down to silence and focus
+- Shake gesture to run your top routine
+- NFC stickers (write them right inside the app)
 
-| Home & Quick Toggle | Focus Mode Detail | Visual Routine Builder |
-|:---:|:---:|:---:|
-| <img src="public/screenshot_home.png" width="240" alt="Home Screen" onerror="this.src='https://via.placeholder.com/300x600/0d1117/38bdf8?text=FlowModes+Home'"/> | <img src="public/screenshot_mode.png" width="240" alt="Mode Detail" onerror="this.src='https://via.placeholder.com/300x600/0d1117/818cf8?text=Mode+Detail'"/> | <img src="public/screenshot_builder.png" width="240" alt="Routine Builder" onerror="this.src='https://via.placeholder.com/300x600/0d1117/a855f7?text=Visual+Builder'"/> |
+**Privacy & Design**
+- 100% offline — zero analytics, zero trackers, no telemetry
+- Monochrome black & white interface with a true-black OLED dark theme
+- System / Light / Dark theme modes
+- JSON backup export & import — your data is yours
 
-| Automation Gallery | Live Execution Logs | Notification Center |
-|:---:|:---:|:---:|
-| <img src="public/screenshot_templates.png" width="240" alt="Templates" onerror="this.src='https://via.placeholder.com/300x600/0d1117/22c55e?text=Templates'"/> | <img src="public/screenshot_logs.png" width="240" alt="Logs" onerror="this.src='https://via.placeholder.com/300x600/0d1117/f59e0b?text=Execution+Logs'"/> | <img src="public/screenshot_notifications.png" width="240" alt="Notifications" onerror="this.src='https://via.placeholder.com/300x600/0d1117/ec4899?text=Notification+Center'"/> |
+## Download
 
----
+Grab the latest signed APK from [**Releases**](https://github.com/Shishir-ip/AutoMatrix/releases/latest):
 
-## 🛠️ Triggers & Actions Architecture
+1. Download `AutoMatrix-v1.0.0.apk`
+2. Open it and allow "Install unknown apps" for your browser/file manager
+3. Done — the app requests permissions progressively as you use features
 
-### 🎛️ Supported Triggers
-- **Time & Days**: Exact time, recurring intervals, sunrise/sunset, weekday/weekend schedules.
-- **Connectivity**: Specific Wi-Fi SSID connected/disconnected, Bluetooth device (Headphones, Car stereo, Smartwatch).
-- **Power & Battery**: Battery falls below/rises above percentage, Charger plugged/unplugged (Fast/Wireless charging).
-- **Application**: Foreground app detection (launching YouTube, Notion, Games, etc.).
-- **Location**: Geofence entry and exit coordinates.
-- **Headphone & Audio**: Wired jack or Bluetooth audio device plugged in.
+> The Play Store bundle (`.aab`) is also attached to each release.
 
-### ⚙️ Supported Actions
-- **Audio & Sound**: Set Media, Ringer, Alarm volume levels; switch to Silent, Vibrate, or Normal.
-- **System Settings**: Toggle Do Not Disturb (DND), Bluetooth, Wi-Fi, Flashlight, Auto-rotate.
-- **Display**: Set exact screen brightness, toggle Dark Mode, screen timeout.
-- **App & Shortcut**: Launch target application, trigger navigation or music playback.
-- **Haptics & Alerts**: Custom vibrations, spoken text-to-speech audio alerts, heads-up notifications.
+## Requirements
 
----
+- Android 7.0+ (API 24); optimized for Android 13–16
+- Optional hardware: NFC (for tag triggers), accelerometer (gestures)
+- Optional access: Notification listener, Accessibility (app-launch triggers), calendar — all off by default and explained in-app in the **Permission Center**
 
-## 🏗️ Architecture & Tech Stack
+## Build from source
 
-```
-com.example/
-├── automation/          # Background Automation Core
-│   ├── engine/          # Condition evaluator, trigger matchers, action dispatchers
-│   ├── receivers/       # BroadcastReceivers for Battery, Wi-Fi, Bluetooth, Screen
-│   ├── scheduler/       # AlarmManager & WorkManager background schedulers
-│   └── services/        # Foreground service for persistent state listening
-├── data/                # Data Access Layer
-│   ├── repository/      # Routines, Modes, Logs, and App repositories
-│   └── model/           # Room / In-memory data entities & DTOs
-├── domain/              # Clean Architecture Use Cases & Business Rules
-├── permissions/         # Android 14+ granular permission helpers (DND, Insets, etc.)
-├── ui/                  # 100% Jetpack Compose UI
-│   ├── components/      # Glassmorphic cards, FlowSwitch, FlowSlider, FlowRowItem
-│   ├── screens/         # Home, Modes, Routines, Builder, Templates, Logs, Settings
-│   └── theme/           # Dynamic Material 3 Expressive theme palette & typography
-└── util/                # Performance utilities, icon decoders, date helpers
-```
-
-- **UI Framework:** Jetpack Compose + Material 3 (M3)
-- **Language:** Kotlin 2.0+ with Coroutines & StateFlow
-- **Background Tasks:** Android WorkManager + AlarmManager + BroadcastReceivers
-- **Performance Optimized:** 0-allocation list items, async icon pre-caching, strict Compose `key` & `contentType` stability.
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Android Studio Ladybug (2024.2.1+) or newer
-- JDK 17 or higher
-- Android SDK 35 (Android 15) / Minimum SDK 26 (Android 8.0)
-
-### Quick Build
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/FlowModes.git
-cd FlowModes
-
-# Build the debug APK
-gradle :app:assembleDebug
-
-# Run unit and local logic tests
-gradle :app:testDebugUnitTest
+git clone https://github.com/Shishir-ip/AutoMatrix.git
+cd AutoMatrix
+./gradlew :app:assembleRelease
 ```
 
----
+- Requires JDK 17+ and the Android SDK (API 36). `local.properties` or `ANDROID_HOME` must point to your SDK.
+- Without a signing key, the release build falls back to debug signing, so `assembleRelease` works out of the box.
+- To produce your own signed build: place `automatrix-release.jks` at the project root and provide
+  `AUTOMATRIX_STORE_PASSWORD`, `AUTOMATRIX_KEY_ALIAS`, `AUTOMATRIX_KEY_PASSWORD` (environment variables or Gradle properties).
 
-## 💡 What Makes FlowModes Unique?
+Run the tests:
 
-1. **Zero Battery Drain Design**: Unlike polling-based automation tools, FlowModes leverages event-driven native Android broadcast listeners and alarm timers.
-2. **Modern Fluid UI**: Say goodbye to clunky 2012-era automation interfaces. FlowModes was crafted ground-up with modern typography, smooth haptic micro-interactions, and dark mode excellence.
-3. **True Transparency**: Every single trigger match and action execution is logged locally with millisecond timestamps and diagnostics.
+```bash
+./gradlew :app:testDebugUnitTest
+```
 
----
+## Tech stack
 
-## 🤝 Contributing
+| Layer      | Tools                                                        |
+|------------|--------------------------------------------------------------|
+| Language   | Kotlin 2.2, Coroutines & Flow                                |
+| UI         | Jetpack Compose, Material 3, custom monochrome design system |
+| Data       | Room (SQLite), DataStore Preferences                         |
+| Navigation | Navigation Compose (single-activity)                         |
+| Build      | Gradle 9, AGP 9, KSP, R8 minification + resource shrinking   |
 
-Contributions, feature requests, and bug reports are warmly welcome!
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+```
+app/src/main/java/com/shishir/automatrix/
+├── automation/        # engine (conditions, actions), receivers, services, scheduler
+├── data/              # Room database, repositories, JSON backup
+├── domain/            # models and built-in templates
+├── permissions/       # permission center logic
+├── ui/                # theme, components, screens, view model
+└── util/              # NFC manager, refresh-rate helper
+```
 
----
+## Contributing
 
-## 📄 License
+Issues and pull requests are welcome. For bigger changes, open an issue first to discuss what you would like to change. Run the unit tests before submitting.
 
-Distributed under the **Apache 2.0 License**. See `LICENSE` for more information.
+## License
+
+Released under the [MIT License](LICENSE). The Inter typeface bundled with the app is licensed under the [SIL Open Font License](INTER-LICENSE.txt).
 
 ---
 
 <p align="center">
-  Crafted with care for the Android Community ❤️
+Developed by <a href="https://github.com/Shishir-ip"><strong>SHISHIR</strong></a>
 </p>

@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "FlowModes"
+rootProject.name = "AutoMatrix"
 
 include(":app")

@@ -1,22 +1,16 @@
-# ProGuard & R8 optimization rules for FlowModes
+# R8 optimization rules for AutoMatrix
 
-# Keep Room database and entities
--keep class androidx.room.** { *; }
--keep class * extends androidx.room.RoomDatabase
--keep @androidx.room.Entity class * { *; }
--keep @androidx.room.Dao class * { *; }
-
-# Keep domain models for JSON serialization and reflection
--keep class com.example.domain.models.** { *; }
--keepclassmembers class com.example.domain.models.** { *; }
-
-# Coroutines and Flow optimization
--keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
--keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
-
-# Compose Runtime rules
+# Strip verbose logging from release builds
 -assumenosideeffects class android.util.Log {
-    public static boolean isLoggable(java.lang.String, int);
     public static int v(...);
     public static int d(...);
 }
+
+# Room database implementations are resolved reflectively at runtime
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class * { <fields>; }
+-keep @androidx.room.Dao interface * { *; }
+
+# Keep names for coroutine debugging and exception handlers
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}

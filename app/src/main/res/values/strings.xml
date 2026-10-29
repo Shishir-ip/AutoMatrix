@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">FlowModes</string>
-    <string name="accessibility_service_desc">FlowModes uses accessibility access only when explicitly enabled by you to detect application launch triggers and perform user-requested device navigation actions like Back or Home.</string>
-    <string name="quick_settings_tile_name">Flow Focus</string>
+    <string name="app_name">AutoMatrix</string>
+    <string name="accessibility_service_desc">AutoMatrix uses accessibility access only when explicitly enabled by you to detect application launch triggers and perform user-requested device navigation actions like Back or Home.</string>
+    <string name="quick_settings_tile_name">AutoMatrix Focus</string>
     <string name="quick_settings_tile_label">Focus Mode</string>
-    <string name="widget_name">FlowModes Quick Focus</string>
-    <string name="widget_description">Switch Focus Modes directly from your home screen</string>
+    <string name="widget_name">AutoMatrix Focus</string>
+    <string name="widget_description">Switch your focus modes right from the home screen</string>
     <string name="widget_status_inactive">Inactive</string>
     <string name="widget_subtext_default">Tap any mode below to start focusing</string>
     <string name="mode_work">Work</string>
