@@ -6,12 +6,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.shishir.automatrix.ui.navigation.FlowAppContent
+import com.shishir.automatrix.ui.screens.onboarding.OnboardingScreen
 import com.shishir.automatrix.ui.theme.AutoMatrixTheme
 import com.shishir.automatrix.ui.viewmodel.FlowViewModel
 import com.shishir.automatrix.util.DisplayRefreshRateHelper
@@ -22,6 +27,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: FlowViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         DisplayRefreshRateHelper.optimizeWindowForHighRefreshRate(this)
@@ -29,10 +35,16 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val themeMode by viewModel.themeMode.collectAsState()
+            val onboardingDone by viewModel.isOnboardingDone.collectAsState()
 
             AutoMatrixTheme(themeMode = themeMode) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    FlowAppContent(viewModel = viewModel)
+                    when (onboardingDone) {
+                        // Preferences still loading — hold the splash background
+                        null -> Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+                        false -> OnboardingScreen(onFinished = { viewModel.completeOnboarding() })
+                        else -> FlowAppContent(viewModel = viewModel)
+                    }
                 }
             }
         }

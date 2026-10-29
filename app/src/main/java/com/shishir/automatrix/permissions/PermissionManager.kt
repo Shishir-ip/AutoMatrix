@@ -104,13 +104,6 @@ object PermissionManager {
         return Settings.System.canWrite(context)
     }
 
-    fun checkLocationPermission(context: Context): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
     fun checkCalendarPermission(context: Context): Boolean {
         return ContextCompat.checkSelfPermission(
             context,
@@ -238,16 +231,6 @@ object PermissionManager {
                 category = "Connectivity",
                 iconName = "Bluetooth",
                 isGranted = checkBluetoothPermission(context),
-                isCriticalForBackground = false,
-                actionIntentProvider = { ctx -> createAppDetailsIntent(ctx) }
-            ),
-            PermissionItem(
-                id = "location",
-                name = "Location Access",
-                description = "Required for geofence triggers (entering / leaving home or work)",
-                category = "Location",
-                iconName = "LocationOn",
-                isGranted = checkLocationPermission(context),
                 isCriticalForBackground = false,
                 actionIntentProvider = { ctx -> createAppDetailsIntent(ctx) }
             ),

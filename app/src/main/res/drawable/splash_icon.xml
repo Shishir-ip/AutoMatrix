@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="192dp"
+    android:height="192dp"
+    android:viewportWidth="192"
+    android:viewportHeight="192">
+    <!-- AutoMatrix rings, white on black -->
+    <path
+        android:pathData="M77,96 m-26,0 a26,26 0 1,1 52,0 a26,26 0 1,1 -52,0"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="11"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M115,96 m-26,0 a26,26 0 1,1 52,0 a26,26 0 1,1 -52,0"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="11"
+        android:fillColor="#00000000" />
+</vector>

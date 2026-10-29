@@ -34,10 +34,12 @@ import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.SystemUpdateAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -68,11 +70,14 @@ import com.shishir.automatrix.ui.components.FlowGlassCard
 import com.shishir.automatrix.ui.components.FlowRowItem
 import com.shishir.automatrix.ui.components.FlowSwitch
 import com.shishir.automatrix.ui.components.NfcToolsDialog
+import com.shishir.automatrix.ui.components.OemBatteryGuideSheet
+import com.shishir.automatrix.util.UpdateChecker
 import com.shishir.automatrix.ui.motion.FlowHaptics
 import com.shishir.automatrix.ui.motion.FlowMotion
 import com.shishir.automatrix.ui.motion.flowPress
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
 import com.shishir.automatrix.permissions.PermissionManager
+import kotlinx.coroutines.launch
 
 private const val DEVELOPER_GITHUB_URL = "https://github.com/Shishir-ip"
 
@@ -101,12 +106,16 @@ fun SettingsScreen(
     val context = LocalContext.current
     val hapticFeedback = LocalHapticFeedback.current
     val view = LocalView.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
 
     var showExportDialog by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
     var showNfcDialog by remember { mutableStateOf(false) }
+    var showOemGuide by remember { mutableStateOf(false) }
     var exportedJsonText by remember { mutableStateOf("") }
     var importInputText by remember { mutableStateOf("") }
+    var isCheckingUpdate by remember { mutableStateOf(false) }
+    var updateResult by remember { mutableStateOf<UpdateChecker.Result?>(null) }
 
     val hasBatteryExemption = remember {
         PermissionManager.checkBatteryOptimizationIgnored(context)
@@ -298,6 +307,13 @@ fun SettingsScreen(
                     )
                     SettingsSeparator()
                     FlowRowItem(
+                        title = "Battery Optimization Guide",
+                        subtitle = "Extra steps for Xiaomi, Samsung, Huawei and more",
+                        icon = Icons.Default.PhoneAndroid,
+                        onClick = { showOemGuide = true }
+                    )
+                    SettingsSeparator()
+                    FlowRowItem(
                         title = "Battery Optimization",
                         subtitle = if (hasBatteryExemption) "Unrestricted — triggers stay reliable" else "Restricted — triggers may be delayed",
                         icon = Icons.Default.BatteryAlert,
@@ -333,6 +349,23 @@ fun SettingsScreen(
                             context.startActivity(
                                 Intent(Intent.ACTION_VIEW, android.net.Uri.parse(DEVELOPER_GITHUB_URL))
                             )
+                        }
+                    )
+                    SettingsSeparator()
+                    FlowRowItem(
+                        title = "Check for Updates",
+                        subtitle = if (isCheckingUpdate) "Checking…" else "Current version ${com.shishir.automatrix.BuildConfig.VERSION_NAME}",
+                        icon = Icons.Default.SystemUpdateAlt,
+                        onClick = {
+                            if (!isCheckingUpdate) {
+                                isCheckingUpdate = true
+                                scope.launch {
+                                    updateResult = UpdateChecker.check(
+                                        com.shishir.automatrix.BuildConfig.VERSION_NAME
+                                    )
+                                    isCheckingUpdate = false
+                                }
+                            }
                         }
                     )
                     SettingsSeparator()
@@ -457,6 +490,68 @@ fun SettingsScreen(
                 showNfcDialog = false
             }
         )
+    }
+
+    if (showOemGuide) {
+        OemBatteryGuideSheet(onDismiss = { showOemGuide = false })
+    }
+
+    when (val result = updateResult) {
+        is UpdateChecker.Result.UpdateAvailable -> {
+            AlertDialog(
+                onDismissRequest = { updateResult = null },
+                title = { Text("Update Available") },
+                text = {
+                    Text("AutoMatrix ${result.latestVersion} is available. You are on ${com.shishir.automatrix.BuildConfig.VERSION_NAME}.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, android.net.Uri.parse(result.releaseUrl))
+                            )
+                            updateResult = null
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = glassColors.accent,
+                            contentColor = if (glassColors.accent == Color.White) Color.Black else Color.White
+                        )
+                    ) {
+                        Text("View Release")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { updateResult = null }) {
+                        Text("Later")
+                    }
+                }
+            )
+        }
+        is UpdateChecker.Result.UpToDate -> {
+            AlertDialog(
+                onDismissRequest = { updateResult = null },
+                title = { Text("You're Up to Date") },
+                text = { Text("AutoMatrix ${com.shishir.automatrix.BuildConfig.VERSION_NAME} is the latest version.") },
+                confirmButton = {
+                    TextButton(onClick = { updateResult = null }) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+        is UpdateChecker.Result.Failed -> {
+            AlertDialog(
+                onDismissRequest = { updateResult = null },
+                title = { Text("Update Check Failed") },
+                text = { Text(result.message ?: "Please check your internet connection and try again.") },
+                confirmButton = {
+                    TextButton(onClick = { updateResult = null }) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+        null -> Unit
     }
 }
 

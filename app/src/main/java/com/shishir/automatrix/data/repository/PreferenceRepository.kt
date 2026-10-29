@@ -17,6 +17,7 @@ class PreferenceRepository(private val context: Context) {
     private val keyFlipToShhh = booleanPreferencesKey("flip_to_shhh_enabled")
     private val keyShakeTrigger = booleanPreferencesKey("shake_trigger_enabled")
     private val keyCalendarTrigger = booleanPreferencesKey("calendar_trigger_enabled")
+    private val keyOnboardingDone = booleanPreferencesKey("onboarding_done")
 
     val themeMode: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[keyThemeMode] ?: "system" // "system", "dark", "light"
@@ -42,6 +43,10 @@ class PreferenceRepository(private val context: Context) {
         prefs[keyCalendarTrigger] ?: false
     }
 
+    val isOnboardingDone: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[keyOnboardingDone] ?: false
+    }
+
     suspend fun setThemeMode(mode: String) {
         context.dataStore.edit { it[keyThemeMode] = mode }
     }
@@ -64,5 +69,9 @@ class PreferenceRepository(private val context: Context) {
 
     suspend fun setCalendarTriggerEnabled(enabled: Boolean) {
         context.dataStore.edit { it[keyCalendarTrigger] = enabled }
+    }
+
+    suspend fun setOnboardingDone(done: Boolean) {
+        context.dataStore.edit { it[keyOnboardingDone] = done }
     }
 }

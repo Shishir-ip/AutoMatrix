@@ -33,19 +33,26 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 **Triggers without opening the app**
 - Flip to Shhh — place the phone face down to silence and focus
 - Shake gesture to run your top routine
+- Notification triggers — react to notifications from any app, matching the title or text (chat apps like WhatsApp supported, including message updates)
 - NFC stickers (write them right inside the app)
 
 **Privacy & Design**
-- 100% offline — zero analytics, zero trackers, no telemetry
+- Zero analytics, zero trackers, fully offline automation
+- The only network use is the manual **Check for Updates** action in Settings — nothing is ever sent anywhere
 - Monochrome black & white interface with a true-black OLED dark theme
 - System / Light / Dark theme modes
 - JSON backup export & import — your data is yours
+
+**Reliability**
+- Guided **battery & startup walkthrough** for Xiaomi, Samsung, Huawei, OnePlus, Vivo and stock Android
+- In-app update check so sideloaded installs never go stale
+- Optional 3-step onboarding that explains permissions up front
 
 ## Download
 
 Grab the latest signed APK from [**Releases**](https://github.com/Shishir-ip/AutoMatrix/releases/latest):
 
-1. Download `AutoMatrix-v1.0.0.apk`
+1. Download `AutoMatrix-v1.1.0.apk`
 2. Open it and allow "Install unknown apps" for your browser/file manager
 3. Done — the app requests permissions progressively as you use features
 

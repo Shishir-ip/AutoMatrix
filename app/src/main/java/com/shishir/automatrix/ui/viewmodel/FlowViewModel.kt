@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -69,6 +70,11 @@ class FlowViewModel(application: Application) : AndroidViewModel(application) {
 
     val isCalendarTriggerEnabled: StateFlow<Boolean> = prefRepo.isCalendarTriggerEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    /** null = still loading from disk; false = onboarding pending; true = seen */
+    val isOnboardingDone: StateFlow<Boolean?> = prefRepo.isOnboardingDone
+        .map<Boolean, Boolean?> { it }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     val phoneOrientation: StateFlow<com.shishir.automatrix.automation.services.PhoneOrientation> = app.gestureSensorManager.currentOrientation
 
@@ -257,6 +263,12 @@ class FlowViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             prefRepo.setCalendarTriggerEnabled(enabled)
             _userFeedback.emit("Calendar integration ${if (enabled) "enabled" else "disabled"}")
+        }
+    }
+
+    fun completeOnboarding() {
+        viewModelScope.launch {
+            prefRepo.setOnboardingDone(true)
         }
     }
 

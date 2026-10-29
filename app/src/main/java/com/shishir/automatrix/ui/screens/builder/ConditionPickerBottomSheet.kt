@@ -54,7 +54,8 @@ fun ConditionPickerBottomSheet(
     val glassColors = LocalFlowGlassColors.current
     var searchQuery by remember { mutableStateOf("") }
 
-    val allConditions = remember { ConditionType.entries }
+    // Location geofence is hidden: it has no live location source yet
+    val allConditions = remember { ConditionType.entries.filter { it != ConditionType.LOCATION_GEOFENCE } }
     val filtered = remember(searchQuery) {
         if (searchQuery.isBlank()) allConditions
         else allConditions.filter {
