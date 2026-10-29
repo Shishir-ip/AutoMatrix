@@ -14,6 +14,25 @@ AutoMatrix turns your phone into an automated, distraction-free environment. Cre
 
 Think of it as the middle ground between iOS Focus Modes and full automation suites like Tasker or MacroDroid — simple enough to set up in a minute, powerful enough for real workflows.
 
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/home.png" width="185" alt="Home" />
+  <img src="screenshots/routines.png" width="185" alt="Routines" />
+  <img src="screenshots/modes.png" width="185" alt="Modes" />
+</p>
+<p align="center">
+  <img src="screenshots/notif_condition.png" width="185" alt="Notification trigger builder" />
+  <img src="screenshots/builder.png" width="185" alt="Routine builder" />
+  <img src="screenshots/settings.png" width="185" alt="Settings" />
+</p>
+<p align="center">
+  <img src="screenshots/onboarding.png" width="185" alt="Onboarding" />
+  <img src="screenshots/mode_detail.png" width="185" alt="Mode detail" />
+</p>
+
+*Shown in dark theme (true black on OLED). Light theme included.*
+
 ---
 
 ## Features
