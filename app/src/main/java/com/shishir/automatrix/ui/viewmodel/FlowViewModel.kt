@@ -59,9 +59,6 @@ class FlowViewModel(application: Application) : AndroidViewModel(application) {
     val themeMode: StateFlow<String> = prefRepo.themeMode
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "system")
 
-    val isDeveloperMode: StateFlow<Boolean> = prefRepo.isDeveloperMode
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
-
     val isFlipToShhhEnabled: StateFlow<Boolean> = prefRepo.isFlipToShhhEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
@@ -283,12 +280,6 @@ class FlowViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setDeveloperMode(enabled: Boolean) {
-        viewModelScope.launch {
-            prefRepo.setDeveloperMode(enabled)
-        }
-    }
-
     fun setFlipToShhhEnabled(enabled: Boolean) {
         viewModelScope.launch {
             prefRepo.setFlipToShhhEnabled(enabled)
@@ -358,14 +349,4 @@ class FlowViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun testSimulatedTrigger(type: ConditionType) {
-        viewModelScope.launch {
-            engine.triggerAutomations(
-                ConditionEvaluator.TriggerContext(
-                    triggerType = type
-                )
-            )
-            _userFeedback.emit("Broadcasted test trigger: ${type.displayName}")
-        }
-    }
 }

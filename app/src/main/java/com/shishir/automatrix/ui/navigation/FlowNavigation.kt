@@ -56,7 +56,6 @@ import androidx.navigation.navArgument
 import com.shishir.automatrix.ui.motion.FlowHaptics
 import com.shishir.automatrix.ui.motion.FlowMotion
 import com.shishir.automatrix.ui.screens.builder.RoutineBuilderScreen
-import com.shishir.automatrix.ui.screens.developer.DeveloperScreen
 import com.shishir.automatrix.ui.screens.home.HomeScreen
 import com.shishir.automatrix.ui.screens.logs.AutomationLogsScreen
 import com.shishir.automatrix.ui.screens.modes.ModeDetailScreen
@@ -86,7 +85,6 @@ sealed class Screen(val route: String, val title: String) {
 
     object PermissionCenter : Screen("permission_center", "Permissions")
     object AutomationLogs : Screen("automation_logs", "Logs")
-    object Developer : Screen("developer", "Developer")
     object Templates : Screen("templates", "Templates")
     object ModeDetail : Screen("mode_detail/{modeId}", "Mode Details") {
         fun createRoute(id: String) = "mode_detail/$id"
@@ -301,7 +299,6 @@ fun FlowAppContent(
 
             composable(Screen.Settings.route) {
                 val themeMode by viewModel.themeMode.collectAsState()
-                val isDeveloperMode by viewModel.isDeveloperMode.collectAsState()
                 val isFlipToShhhEnabled by viewModel.isFlipToShhhEnabled.collectAsState()
                 val isShakeTriggerEnabled by viewModel.isShakeTriggerEnabled.collectAsState()
                 val isCalendarTriggerEnabled by viewModel.isCalendarTriggerEnabled.collectAsState()
@@ -311,7 +308,6 @@ fun FlowAppContent(
 
                 SettingsScreen(
                     themeMode = themeMode,
-                    isDeveloperMode = isDeveloperMode,
                     isFlipToShhhEnabled = isFlipToShhhEnabled,
                     isShakeTriggerEnabled = isShakeTriggerEnabled,
                     isCalendarTriggerEnabled = isCalendarTriggerEnabled,
@@ -319,7 +315,6 @@ fun FlowAppContent(
                     modes = modes,
                     flipTargetModeId = flipTargetModeId,
                     onThemeModeChange = { viewModel.setThemeMode(it) },
-                    onDeveloperModeChange = { viewModel.setDeveloperMode(it) },
                     onFlipToShhhChange = { viewModel.setFlipToShhhEnabled(it) },
                     onFlipTargetModeChange = { viewModel.setFlipTargetModeId(it) },
                     onShakeTriggerChange = { viewModel.setShakeTriggerEnabled(it) },
@@ -329,7 +324,6 @@ fun FlowAppContent(
                     onImportBackup = { viewModel.importBackup(it) },
                     onNavigateToPermissions = { navController.navigate(Screen.PermissionCenter.route) },
                     onNavigateToLogs = { navController.navigate(Screen.AutomationLogs.route) },
-                    onNavigateToDeveloper = { navController.navigate(Screen.Developer.route) }
                 )
             }
 
@@ -404,13 +398,6 @@ fun FlowAppContent(
                 AutomationLogsScreen(
                     logs = logs,
                     onClearLogs = { viewModel.clearLogs() },
-                    onNavigateBack = { navController.popBackStack() }
-                )
-            }
-
-            composable(Screen.Developer.route) {
-                DeveloperScreen(
-                    onTriggerCondition = { viewModel.testSimulatedTrigger(it) },
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

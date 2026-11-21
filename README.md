@@ -79,7 +79,7 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 
 Grab the latest signed APK from [**Releases**](https://github.com/Shishir-ip/AutoMatrix/releases/latest):
 
-1. Download `AutoMatrix-v1.5.0.apk`
+1. Download `AutoMatrix-v1.6.0.apk`
 2. Open it and allow "Install unknown apps" for your browser/file manager
 3. Done — the app requests permissions progressively as you use features
 

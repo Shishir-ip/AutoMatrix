@@ -39,7 +39,6 @@ import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Smartphone
-import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.SystemUpdateAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -86,7 +85,6 @@ private const val DEVELOPER_GITHUB_URL = "https://github.com/Shishir-ip"
 @Composable
 fun SettingsScreen(
     themeMode: String,
-    isDeveloperMode: Boolean,
     isFlipToShhhEnabled: Boolean,
     isShakeTriggerEnabled: Boolean,
     isCalendarTriggerEnabled: Boolean,
@@ -94,7 +92,6 @@ fun SettingsScreen(
     modes: List<Mode>,
     flipTargetModeId: String,
     onThemeModeChange: (String) -> Unit,
-    onDeveloperModeChange: (Boolean) -> Unit,
     onFlipToShhhChange: (Boolean) -> Unit,
     onFlipTargetModeChange: (String) -> Unit,
     onShakeTriggerChange: (Boolean) -> Unit,
@@ -103,8 +100,7 @@ fun SettingsScreen(
     onExportBackup: () -> String,
     onImportBackup: (String) -> Unit,
     onNavigateToPermissions: () -> Unit,
-    onNavigateToLogs: () -> Unit,
-    onNavigateToDeveloper: () -> Unit
+    onNavigateToLogs: () -> Unit
 ) {
     val glassColors = LocalFlowGlassColors.current
     val context = LocalContext.current
@@ -352,7 +348,7 @@ fun SettingsScreen(
                 Column {
                     FlowRowItem(
                         title = "Version",
-                        subtitle = "AutoMatrix 1.0.0",
+                        subtitle = "AutoMatrix ${com.shishir.automatrix.BuildConfig.VERSION_NAME}",
                         icon = Icons.Default.Info
                     )
                     SettingsSeparator()
@@ -389,26 +385,6 @@ fun SettingsScreen(
                             }
                         }
                     )
-                    SettingsSeparator()
-                    FlowRowItem(
-                        title = "Developer Mode",
-                        subtitle = "Diagnostics and test triggers",
-                        icon = Icons.Default.BugReport,
-                        trailing = {
-                            FlowSwitch(
-                                checked = isDeveloperMode,
-                                onCheckedChange = onDeveloperModeChange
-                            )
-                        }
-                    )
-                    if (isDeveloperMode) {
-                        SettingsSeparator()
-                        FlowRowItem(
-                            title = "Developer Tools",
-                            icon = Icons.Default.BugReport,
-                            onClick = onNavigateToDeveloper
-                        )
-                    }
                 }
             }
         }

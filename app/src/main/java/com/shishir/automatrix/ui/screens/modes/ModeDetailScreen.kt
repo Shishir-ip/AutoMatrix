@@ -394,40 +394,40 @@ fun ModeDetailScreen(
                                         )
                                     }
                                 }
+                            }
 
-                                // Add-action row lives inside the card so it can
-                                // never overlap surrounding content on any device
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            FlowHaptics.tick(hapticFeedback, view)
-                                            showActionPicker = true
-                                        }
-                                        .padding(horizontal = 14.dp, vertical = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(28.dp)
-                                            .clip(CircleShape)
-                                            .background(accentColor.copy(alpha = 0.14f)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Add,
-                                            contentDescription = null,
-                                            tint = accentColor,
-                                            modifier = Modifier.size(16.dp)
-                                        )
+                            // Add-action row lives inside the card and is always
+                            // visible — including when the mode has no actions yet
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        FlowHaptics.tick(hapticFeedback, view)
+                                        showActionPicker = true
                                     }
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text(
-                                        text = "Add Action",
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                        color = glassColors.textPrimary
+                                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(28.dp)
+                                        .clip(CircleShape)
+                                        .background(accentColor.copy(alpha = 0.14f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = null,
+                                        tint = accentColor,
+                                        modifier = Modifier.size(16.dp)
                                     )
                                 }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = "Add Action",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                    color = glassColors.textPrimary
+                                )
                             }
                         }
                     }

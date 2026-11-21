@@ -12,7 +12,6 @@ private val Context.dataStore by preferencesDataStore(name = "flowmodes_prefs")
 
 class PreferenceRepository(private val context: Context) {
     private val keyThemeMode = stringPreferencesKey("theme_mode")
-    private val keyDeveloperMode = booleanPreferencesKey("developer_mode")
     private val keyFirstLaunch = booleanPreferencesKey("first_launch_done")
     private val keyFlipToShhh = booleanPreferencesKey("flip_to_shhh_enabled")
     private val keyShakeTrigger = booleanPreferencesKey("shake_trigger_enabled")
@@ -27,10 +26,6 @@ class PreferenceRepository(private val context: Context) {
 
     val themeMode: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[keyThemeMode] ?: "system" // "system", "dark", "light"
-    }
-
-    val isDeveloperMode: Flow<Boolean> = context.dataStore.data.map { prefs ->
-        prefs[keyDeveloperMode] ?: false
     }
 
     val isFirstLaunchDone: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -55,10 +50,6 @@ class PreferenceRepository(private val context: Context) {
 
     suspend fun setThemeMode(mode: String) {
         context.dataStore.edit { it[keyThemeMode] = mode }
-    }
-
-    suspend fun setDeveloperMode(enabled: Boolean) {
-        context.dataStore.edit { it[keyDeveloperMode] = enabled }
     }
 
     suspend fun setFirstLaunchDone(done: Boolean) {
