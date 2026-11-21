@@ -82,11 +82,16 @@ class FlowWidgetProvider : AppWidgetProvider() {
                             views.setViewVisibility(slotId, android.view.View.GONE)
                         } else {
                             views.setViewVisibility(slotId, android.view.View.VISIBLE)
-                            views.setTextViewText(slotId, mode.name)
-                            views.setInt(
+                            // Only universally-remotable ops here: text, color,
+                            // visibility, click. setBackgroundResource is NOT
+                            // remotable and crashes the host when applying.
+                            views.setTextViewText(
                                 slotId,
-                                "setBackgroundResource",
-                                if (mode.isActive) R.drawable.widget_btn_active_bg else R.drawable.widget_btn_bg
+                                if (mode.isActive) "\u25cf " + mode.name else mode.name
+                            )
+                            views.setTextColor(
+                                slotId,
+                                if (mode.isActive) 0xFFFFFFFF.toInt() else 0xFFB8B8BD.toInt()
                             )
                             views.setOnClickPendingIntent(
                                 slotId,

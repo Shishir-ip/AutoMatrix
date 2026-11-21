@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import android.content.Context
 import android.media.RingtoneManager
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
@@ -78,6 +79,7 @@ fun ActionConfigSheet(
     onSaveAction: (AutomationAction) -> Unit
 ) {
     val glassColors = LocalFlowGlassColors.current
+    val context = LocalContext.current
     val parsedConfig = remember(action) {
         try { JSONObject(action.configJson.ifEmpty { "{}" }) } catch (_: Exception) { JSONObject() }
     }
@@ -701,6 +703,31 @@ fun ActionConfigSheet(
                                 text = "adb shell pm grant com.shishir.automatrix android.permission.WRITE_SECURE_SETTINGS",
                                 fontSize = 11.sp,
                                 color = glassColors.textPrimary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Tap to copy this command",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = LocalFlowGlassColors.current.accent,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable {
+                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                        clipboard.setPrimaryClip(
+                                            android.content.ClipData.newPlainText(
+                                                "AutoMatrix ADB",
+                                                "adb shell pm grant com.shishir.automatrix android.permission.WRITE_SECURE_SETTINGS"
+                                            )
+                                        )
+                                        android.widget.Toast.makeText(
+                                            context,
+                                            "Command copied — paste it in a terminal with adb",
+                                            android.widget.Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                    .padding(vertical = 4.dp)
                             )
                         }
                     }

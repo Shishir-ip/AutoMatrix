@@ -173,7 +173,12 @@ class FlowViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun createMode(name: String, iconName: String, description: String) {
+    fun createMode(
+        name: String,
+        iconName: String,
+        description: String,
+        onCreated: (String) -> Unit = {}
+    ) {
         viewModelScope.launch {
             val trimmed = name.trim()
             if (trimmed.isEmpty()) {
@@ -189,7 +194,8 @@ class FlowViewModel(application: Application) : AndroidViewModel(application) {
                 isActive = false
             )
             repository.upsertMode(mode)
-            _userFeedback.emit("Mode \"$trimmed\" created — tap it to add actions")
+            _userFeedback.emit("Mode \"$trimmed\" created — add its actions now")
+            onCreated(mode.id)
         }
     }
 

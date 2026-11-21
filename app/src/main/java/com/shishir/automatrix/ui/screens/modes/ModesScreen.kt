@@ -77,7 +77,7 @@ fun ModesScreen(
     modes: List<Mode>,
     onToggleMode: (Mode) -> Unit,
     onNavigateToModeDetail: (String) -> Unit = {},
-    onCreateMode: (String, String, String) -> Unit = { _, _, _ -> }
+    onCreateMode: (String, String, String, onCreated: (String) -> Unit) -> Unit = { _, _, _, _ -> }
 ) {
     val glassColors = LocalFlowGlassColors.current
     val hapticFeedback = LocalHapticFeedback.current
@@ -171,8 +171,10 @@ fun ModesScreen(
         CreateModeSheet(
             onDismiss = { showCreateSheet = false },
             onCreate = { name, icon, description ->
-                onCreateMode(name, icon, description)
-                showCreateSheet = false
+                onCreateMode(name, icon, description) { newId ->
+                    showCreateSheet = false
+                    onNavigateToModeDetail(newId)
+                }
             }
         )
     }

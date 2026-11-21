@@ -93,7 +93,7 @@ fun RoutinesScreen(
                 containerColor = LocalFlowGlassColors.current.accent,
                 contentColor = if (LocalFlowGlassColors.current.accent == Color.White) Color.Black else Color.White,
                 shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.padding(bottom = 76.dp)
+                modifier = Modifier.padding(bottom = 12.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Create Routine")
             }
@@ -187,7 +187,7 @@ fun RoutinesScreen(
                         singleLine = true,
                         modifier = Modifier
                             .weight(1f)
-                            .height(48.dp),
+                            .height(56.dp),
                         shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = LocalFlowGlassColors.current.accent,

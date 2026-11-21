@@ -124,10 +124,17 @@ fun ConditionConfigSheet(
     }
 
     // Time Range fields
-    var startHour by remember { mutableIntStateOf(parsedConfig.optInt("startHour", 22)) }
-    var startMinute by remember { mutableIntStateOf(parsedConfig.optInt("startMinute", 0)) }
-    var endHour by remember { mutableIntStateOf(parsedConfig.optInt("endHour", 7)) }
-    var endMinute by remember { mutableIntStateOf(parsedConfig.optInt("endMinute", 0)) }
+    val startTimeState = androidx.compose.material3.rememberTimePickerState(
+        initialHour = parsedConfig.optInt("startHour", 22),
+        initialMinute = parsedConfig.optInt("startMinute", 0),
+        is24Hour = false
+    )
+    val endTimeState = androidx.compose.material3.rememberTimePickerState(
+        initialHour = parsedConfig.optInt("endHour", 7),
+        initialMinute = parsedConfig.optInt("endMinute", 0),
+        is24Hour = false
+    )
+    var editingRangeSide by remember { mutableStateOf<String?>(null) }
 
     // Geofence fields
     var geofenceEvent by remember { mutableStateOf(parsedConfig.optString("event", "ARRIVING")) }
@@ -511,22 +518,38 @@ fun ConditionConfigSheet(
                     ) {
                         FlowGlassCard(
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(14.dp)
+                            shape = RoundedCornerShape(14.dp),
+                            onClick = { editingRangeSide = if (editingRangeSide == "start") null else "start" }
                         ) {
                             Column(modifier = Modifier.padding(14.dp)) {
-                                Text("Start Time", style = MaterialTheme.typography.bodySmall, color = glassColors.textSecondary)
-                                Text("%02d:%02d".format(startHour, startMinute), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LocalFlowGlassColors.current.accent)
+                                Text("Start Time — tap to edit", style = MaterialTheme.typography.bodySmall, color = glassColors.textSecondary)
+                                Text(
+                                    "%02d:%02d".format(startTimeState.hour, startTimeState.minute),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = if (editingRangeSide == "start") LocalFlowGlassColors.current.accent else glassColors.textPrimary
+                                )
                             }
                         }
                         FlowGlassCard(
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(14.dp)
+                            shape = RoundedCornerShape(14.dp),
+                            onClick = { editingRangeSide = if (editingRangeSide == "end") null else "end" }
                         ) {
                             Column(modifier = Modifier.padding(14.dp)) {
-                                Text("End Time", style = MaterialTheme.typography.bodySmall, color = glassColors.textSecondary)
-                                Text("%02d:%02d".format(endHour, endMinute), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = LocalFlowGlassColors.current.accent)
+                                Text("End Time — tap to edit", style = MaterialTheme.typography.bodySmall, color = glassColors.textSecondary)
+                                Text(
+                                    "%02d:%02d".format(endTimeState.hour, endTimeState.minute),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = if (editingRangeSide == "end") LocalFlowGlassColors.current.accent else glassColors.textPrimary
+                                )
                             }
                         }
+                    }
+
+                    if (editingRangeSide == "start") {
+                        TimePicker(state = startTimeState)
+                    } else if (editingRangeSide == "end") {
+                        TimePicker(state = endTimeState)
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -549,10 +572,11 @@ fun ConditionConfigSheet(
                                     .clip(RoundedCornerShape(20.dp))
                                     .background(glassColors.glassSurface)
                                     .clickable {
-                                        startHour = start.first
-                                        startMinute = start.second
-                                        endHour = end.first
-                                        endMinute = end.second
+                                        startTimeState.hour = start.first
+                                        startTimeState.minute = start.second
+                                        endTimeState.hour = end.first
+                                        endTimeState.minute = end.second
+                                        editingRangeSide = null
                                     }
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
@@ -841,11 +865,11 @@ fun ConditionConfigSheet(
                             newSummary = "Opened $openedAppName"
                         }
                         ConditionType.TIME_RANGE -> {
-                            newConfig.put("startHour", startHour)
-                            newConfig.put("startMinute", startMinute)
-                            newConfig.put("endHour", endHour)
-                            newConfig.put("endMinute", endMinute)
-                            newSummary = "%02d:%02d – %02d:%02d".format(startHour, startMinute, endHour, endMinute)
+                            newConfig.put("startHour", startTimeState.hour)
+                            newConfig.put("startMinute", startTimeState.minute)
+                            newConfig.put("endHour", endTimeState.hour)
+                            newConfig.put("endMinute", endTimeState.minute)
+                            newSummary = "%02d:%02d – %02d:%02d".format(startTimeState.hour, startTimeState.minute, endTimeState.hour, endTimeState.minute)
                         }
                         ConditionType.LOCATION_GEOFENCE -> {
                             newConfig.put("event", geofenceEvent)

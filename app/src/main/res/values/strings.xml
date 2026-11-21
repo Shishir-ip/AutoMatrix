@@ -7,8 +7,5 @@
     <string name="widget_description">Switch your focus modes right from the home screen</string>
     <string name="widget_status_inactive">Inactive</string>
     <string name="widget_subtext_default">Tap any mode below to start focusing</string>
-    <string name="mode_work">Work</string>
-    <string name="mode_study">Study</string>
-    <string name="mode_sleep">Sleep</string>
     <string name="widget_btn_off">Turn Off</string>
 </resources>

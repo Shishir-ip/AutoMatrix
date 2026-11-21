@@ -66,6 +66,7 @@ import com.shishir.automatrix.ui.screens.routines.RoutineDetailScreen
 import com.shishir.automatrix.ui.screens.routines.RoutinesScreen
 import com.shishir.automatrix.ui.screens.settings.SettingsScreen
 import com.shishir.automatrix.ui.screens.templates.TemplatesGalleryScreen
+import androidx.compose.foundation.layout.WindowInsets
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
 import com.shishir.automatrix.ui.viewmodel.FlowViewModel
 
@@ -131,6 +132,7 @@ fun FlowAppContent(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (isTopLevelDestination) {
@@ -202,7 +204,9 @@ fun FlowAppContent(
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = innerPadding.calculateBottomPadding()),
             enterTransition = {
                 slideInHorizontally(
                     initialOffsetX = { it },
@@ -289,8 +293,8 @@ fun FlowAppContent(
                     onNavigateToModeDetail = { id ->
                         navController.navigate(Screen.ModeDetail.createRoute(id))
                     },
-                    onCreateMode = { name, icon, description ->
-                        viewModel.createMode(name, icon, description)
+                    onCreateMode = { name, icon, description, onCreated ->
+                        viewModel.createMode(name, icon, description) { id -> onCreated(id) }
                     }
                 )
             }
