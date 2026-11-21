@@ -41,7 +41,7 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 - One-tap device profiles: Work, Study, Sleep, Driving, Gaming, Travel — **plus create your own (name + icon + actions) and delete any you don't want**
 - **Full action editor on every mode** — add, configure, and remove actions just like in routines
 - Persistent lock-screen banner with *End Early* and *Mute 30 min* actions
-- Quick Settings tile and a home-screen widget that follows your actual modes (with an active-state highlight)
+- Quick Settings tile and a home-screen widget that follows your actual modes (active mode highlighted; taps switch instantly)
 - Automatic revert: settings restore when the mode ends
 
 **Routines (Automation)**
@@ -79,7 +79,7 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 
 Grab the latest signed APK from [**Releases**](https://github.com/Shishir-ip/AutoMatrix/releases/latest):
 
-1. Download `AutoMatrix-v1.4.0.apk`
+1. Download `AutoMatrix-v1.5.0.apk`
 2. Open it and allow "Install unknown apps" for your browser/file manager
 3. Done — the app requests permissions progressively as you use features
 
