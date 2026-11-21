@@ -53,6 +53,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shishir.automatrix.domain.models.Mode
 import com.shishir.automatrix.ui.components.FlowGlassCard
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import com.shishir.automatrix.domain.models.AutomationAction
+import com.shishir.automatrix.ui.screens.builder.ActionPickerBottomSheet
+import com.shishir.automatrix.ui.screens.builder.ActionConfigSheet
 import com.shishir.automatrix.ui.components.FlowPrimaryButton
 import com.shishir.automatrix.ui.components.FlowSwitch
 import com.shishir.automatrix.ui.components.IconHelper
@@ -67,17 +72,23 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModeDetailScreen(
     mode: Mode?,
     onNavigateBack: () -> Unit,
     onToggleMode: (Mode) -> Unit,
-    onDeleteMode: (Mode) -> Unit = {}
+    onDeleteMode: (Mode) -> Unit = {},
+    onUpdateModeActions: (Mode, List<com.shishir.automatrix.domain.models.AutomationAction>) -> Unit = { _, _ -> }
 ) {
     val glassColors = LocalFlowGlassColors.current
     val hapticFeedback = LocalHapticFeedback.current
     val view = LocalView.current
     var showDeleteConfirm by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showActionPicker by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var editingAction by androidx.compose.runtime.remember {
+        androidx.compose.runtime.mutableStateOf<com.shishir.automatrix.domain.models.AutomationAction?>(null)
+    }
 
     if (mode == null) {
         Box(
@@ -297,7 +308,7 @@ fun ModeDetailScreen(
                         Column {
                             if (mode.actions.isEmpty()) {
                                 Text(
-                                    text = "No custom actions configured for this mode.",
+                                    text = "No actions configured for this mode yet — tap Add Action below.",
                                     fontSize = 13.sp,
                                     color = glassColors.textMuted,
                                     modifier = Modifier.padding(16.dp)
@@ -307,6 +318,10 @@ fun ModeDetailScreen(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
+                                            .clickable {
+                                                FlowHaptics.tick(hapticFeedback, view)
+                                                editingAction = act
+                                            }
                                             .padding(horizontal = 14.dp, vertical = 13.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
@@ -351,6 +366,22 @@ fun ModeDetailScreen(
                                                 modifier = Modifier.size(18.dp)
                                             )
                                         }
+
+                                        IconButton(
+                                            onClick = {
+                                                FlowHaptics.tick(hapticFeedback, view)
+                                                val updated = mode.actions.filter { it.id != act.id }
+                                                onUpdateModeActions(mode, updated)
+                                            },
+                                            modifier = Modifier.size(28.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Close,
+                                                contentDescription = "Remove action",
+                                                tint = glassColors.textMuted,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
                                     }
 
                                     if (index < mode.actions.size - 1) {
@@ -365,8 +396,42 @@ fun ModeDetailScreen(
                                 }
                             }
                         }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .border(
+                                1.dp,
+                                glassColors.glassBorder,
+                                RoundedCornerShape(14.dp)
+                            )
+                            .clickable {
+                                FlowHaptics.tick(hapticFeedback, view)
+                                showActionPicker = true
+                            }
+                            .padding(vertical = 12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                tint = accentColor,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Add Action",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = glassColors.textPrimary
+                            )
+                        }
                     }
                 }
+            }
             }
 
             // How to trigger this mode info card
@@ -472,6 +537,36 @@ fun ModeDetailScreen(
                 androidx.compose.material3.TextButton(onClick = { showDeleteConfirm = false }) {
                     Text("Cancel")
                 }
+            }
+        )
+    }
+
+    if (showActionPicker) {
+        val pickerState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ActionPickerBottomSheet(
+            sheetState = pickerState,
+            onDismiss = { showActionPicker = false },
+            onActionSelected = { act ->
+                editingAction = act.copy(id = java.util.UUID.randomUUID().toString(), routineId = "")
+            }
+        )
+    }
+
+    editingAction?.let { act ->
+        val configState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ActionConfigSheet(
+            action = act,
+            sheetState = configState,
+            onDismiss = { editingAction = null },
+            onSaveAction = { saved ->
+                val exists = mode.actions.any { it.id == saved.id }
+                val updated = if (exists) {
+                    mode.actions.map { if (it.id == saved.id) saved else it }
+                } else {
+                    mode.actions + saved
+                }
+                onUpdateModeActions(mode, updated)
+                editingAction = null
             }
         )
     }

@@ -32,6 +32,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         DisplayRefreshRateHelper.optimizeWindowForHighRefreshRate(this)
         handleNfcIntent(intent)
+        handleImportIntent(intent)
 
         setContent {
             val themeMode by viewModel.themeMode.collectAsState()
@@ -59,6 +60,14 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         handleNfcIntent(intent)
+        handleImportIntent(intent)
+    }
+
+    private fun handleImportIntent(intent: android.content.Intent?) {
+        val data = intent?.data ?: return
+        if (data.scheme == "automatrix" && data.host == "import") {
+            viewModel.importBackup(data.toString())
+        }
     }
 
     private fun handleNfcIntent(intent: android.content.Intent?) {

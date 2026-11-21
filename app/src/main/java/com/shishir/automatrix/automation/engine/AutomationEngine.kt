@@ -1,5 +1,6 @@
 package com.shishir.automatrix.automation.engine
 
+import com.shishir.automatrix.domain.models.ActionType
 import android.content.Context
 import com.shishir.automatrix.data.repository.AutomationRepository
 import com.shishir.automatrix.domain.models.ActionResult
@@ -158,6 +159,18 @@ class AutomationEngine(
         val actionSummaries = mutableListOf<String>()
 
         for (action in routine.actions) {
+            // Wait / Delay actions pause the chain without hitting the executor
+            if (action.type == ActionType.WAIT) {
+                val seconds = try {
+                    JSONObject(action.configJson.ifEmpty { "{}" }).optInt("durationSec", 30)
+                        .coerceIn(1, 3600)
+                } catch (_: Exception) {
+                    30
+                }
+                kotlinx.coroutines.delay(seconds * 1000L)
+                actionSummaries.add("- ${action.title}: Waited ${if (seconds >= 60) "${seconds / 60}m ${seconds % 60}s" else "${seconds}s"}")
+                continue
+            }
             val result = ActionExecutor.executeAction(context, action)
             actionResults.add(result)
             when (result) {

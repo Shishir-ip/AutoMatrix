@@ -135,6 +135,12 @@ fun ActionConfigSheet(
     var speakText by remember { mutableStateOf(parsedConfig.optString("text", "Automation triggered")) }
     var speakAlarmStream by remember { mutableStateOf(parsedConfig.optBoolean("alarmStream", false)) }
 
+    // Battery saver
+    var batterySaverOn by remember { mutableStateOf(parsedConfig.optBoolean("enable", true)) }
+
+    // Wait delay
+    var waitSeconds by remember { mutableFloatStateOf(parsedConfig.optInt("durationSec", 30).toFloat()) }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -643,6 +649,89 @@ fun ActionConfigSheet(
                     }
                 }
 
+                ActionType.SET_BATTERY_SAVER -> {
+                    Text(
+                        text = "Battery Saver",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                        color = glassColors.textPrimary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Toggles the OS battery saver (works on every device). Pair with a Time Window condition to enable it during a period, and another routine with the complementary window to turn it off.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = glassColors.textSecondary
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        FilterChip(
+                            selected = batterySaverOn,
+                            onClick = { batterySaverOn = true },
+                            label = { Text("Turn ON") },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = LocalFlowGlassColors.current.accent.copy(alpha = 0.25f),
+                                selectedLabelColor = LocalFlowGlassColors.current.accent
+                            )
+                        )
+                        FilterChip(
+                            selected = !batterySaverOn,
+                            onClick = { batterySaverOn = false },
+                            label = { Text("Turn OFF") },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = LocalFlowGlassColors.current.accent.copy(alpha = 0.25f),
+                                selectedLabelColor = LocalFlowGlassColors.current.accent
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    FlowGlassCard(modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Text(
+                                text = "One-time setup",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = glassColors.textPrimary
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Android only allows this with an elevated permission. Connect the phone to a computer once and run:",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = glassColors.textSecondary
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "adb shell pm grant com.shishir.automatrix android.permission.WRITE_SECURE_SETTINGS",
+                                fontSize = 11.sp,
+                                color = glassColors.textPrimary
+                            )
+                        }
+                    }
+                }
+
+                ActionType.WAIT -> {
+                    Text(
+                        text = "Wait Duration",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                        color = glassColors.textPrimary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Pauses the rest of this routine before the next action runs.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = glassColors.textSecondary
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = formatWaitLabel(waitSeconds.toInt()),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = glassColors.textPrimary
+                    )
+                    FlowSlider(
+                        value = waitSeconds,
+                        onValueChange = { waitSeconds = it },
+                        valueRange = 1f..600f,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
                 ActionType.TOGGLE_FLASHLIGHT -> {
                     Text(
                         text = "Flashlight Mode",
@@ -817,6 +906,14 @@ fun ActionConfigSheet(
                             newConfig.put("alarmStream", speakAlarmStream)
                             newSummary = if (speakAlarmStream) "Speak (always audible): \"$speakText\"" else "Speak: \"$speakText\""
                         }
+                        ActionType.SET_BATTERY_SAVER -> {
+                            newConfig.put("enable", batterySaverOn)
+                            newSummary = if (batterySaverOn) "Battery Saver ON" else "Battery Saver OFF"
+                        }
+                        ActionType.WAIT -> {
+                            newConfig.put("durationSec", waitSeconds.toInt())
+                            newSummary = "Wait " + formatWaitLabel(waitSeconds.toInt())
+                        }
                     }
 
                     val updated = action.copy(
@@ -912,4 +1009,9 @@ fun ActionConfigSheet(
             }
         )
     }
+}
+
+private fun formatWaitLabel(seconds: Int): String = when {
+    seconds >= 60 -> "\${seconds / 60} min \${seconds % 60} s"
+    else -> "\$seconds s"
 }

@@ -43,7 +43,10 @@ class AutoMatrixApp : Application() {
                 repository.initializeDefaultDataIfEmpty()
                 preferenceRepository.setFirstLaunchDone(true)
             }
-            flowScheduler.scheduleNextEvaluation()
+            // Only arm the periodic engine sweep when something can actually run
+            if (repository.getActiveRoutines().isNotEmpty()) {
+                flowScheduler.scheduleNextEvaluation()
+            }
         }
 
         // Reactively synchronize active focus mode across Lock Screen Ongoing Notification, QS Tile, and Widget
@@ -75,12 +78,18 @@ class AutoMatrixApp : Application() {
         }
 
         // Permission watchdog: warn the user when a permission an enabled
-        // automation depends on is missing (e.g. accessibility off after reboot)
+        // automation depends on is missing (e.g. accessibility off after reboot).
+        // Also keeps the periodic engine sweep armed only while it has work to do.
         applicationScope.launch {
             repository.allRoutines.collect { routines ->
                 com.shishir.automatrix.permissions.PermissionWatchdog.checkAndNotify(
                     this@AutoMatrixApp, routines
                 )
+                if (routines.any { it.isEnabled }) {
+                    flowScheduler.scheduleNextEvaluation()
+                } else {
+                    flowScheduler.cancelScheduledEvaluation()
+                }
             }
         }
     }

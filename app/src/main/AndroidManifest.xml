@@ -21,6 +21,9 @@
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <!-- The only network use: the manual "Check for Updates" action in Settings -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Declared but never auto-granted: lets the Battery Saver action toggle
+         the OS power-save mode after the user grants it once via ADB -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <!-- Lets the in-app updater hand the downloaded APK to the system installer -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
@@ -55,6 +58,13 @@
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="automatrix" />
+            </intent-filter>
+            <!-- Routine share links (QR codes / shared links) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="automatrix" android:host="import" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.nfc.action.TAG_DISCOVERED" />

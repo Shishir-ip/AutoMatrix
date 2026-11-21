@@ -38,16 +38,20 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 ## Features
 
 **Focus Modes**
-- One-tap device profiles: Work, Study, Sleep, Driving, Gaming, Travel — **plus create your own and delete any you don't want**
+- One-tap device profiles: Work, Study, Sleep, Driving, Gaming, Travel — **plus create your own (name + icon + actions) and delete any you don't want**
+- **Full action editor on every mode** — add, configure, and remove actions just like in routines
 - Persistent lock-screen banner with *End Early* and *Mute 30 min* actions
-- Quick Settings tile and a home-screen widget for instant switching
+- Quick Settings tile and a home-screen widget that follows your actual modes (with an active-state highlight)
 - Automatic revert: settings restore when the mode ends
 
 **Routines (Automation)**
 - Triggers: time schedules with a visual clock picker, days of the week, battery level, charging state, battery saver on/off, airplane mode on/off, Do Not Disturb on/off, Wi-Fi networks, Bluetooth devices, headphone plug, screen on/off, boot completed, app launch (accessibility), NFC tags, calendar events
 - Conditions: combine triggers with All (AND) / Any (OR) logic and priorities
-- Actions: ringer mode, DND, media/ring volume, brightness, Wi-Fi, Bluetooth, launch app, notifications, **Emergency Alarm** (loud alarm on the alarm stream — audible even when the phone is silent; pick any system alarm sound, and a notification with a Stop button appears while it rings), **Speak Text** (text-to-speech voice alerts), flashlight, vibration, open URL, and more — with restore-on-exit support
+- Actions: ringer mode, DND, media/ring volume, brightness, Wi-Fi, Bluetooth, launch app, notifications, **Emergency Alarm** (loud alarm on the alarm stream — audible even when the phone is silent; pick any system alarm sound, and a notification with a Stop button appears while it rings), **Speak Text** (text-to-speech voice alerts), **Battery Saver on/off** (one-time ADB setup — see the in-app guide), **Wait/Delay** steps between actions, flashlight, vibration, open URL, and more — with restore-on-exit support
 - Ready-made template gallery: Sleep Mode, Morning Routine, Battery Saver, Commute, Security Guard and others
+
+**Sharing**
+- Share any routine as a **QR code** or a share link — the receiving device imports it disabled, ready to review and enable
 
 **Triggers without opening the app**
 - Flip to Shhh — place the phone face down; **you choose which mode it starts** (any of your modes, or routines-only)
@@ -58,6 +62,7 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 **Reliability built in**
 - A permission watchdog notifies you when an enabled automation can't run — e.g. if accessibility gets switched off after a phone restart
 - Nothing is enabled by default: freshly installed routines are pre-built examples, all switched off until you turn them on
+- The background engine only wakes up when you actually have routines enabled
 - Guided **battery & startup walkthrough** for Xiaomi, Samsung, Huawei, OnePlus, Vivo and stock Android
 - **Full in-app updater**: check for updates, see what's new, download with a progress bar, and install straight from the completion prompt — full changelog one tap away
 - Optional 3-step onboarding that explains permissions up front
@@ -74,7 +79,7 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 
 Grab the latest signed APK from [**Releases**](https://github.com/Shishir-ip/AutoMatrix/releases/latest):
 
-1. Download `AutoMatrix-v1.3.0.apk`
+1. Download `AutoMatrix-v1.4.0.apk`
 2. Open it and allow "Install unknown apps" for your browser/file manager
 3. Done — the app requests permissions progressively as you use features
 

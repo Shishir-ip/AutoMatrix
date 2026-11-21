@@ -127,7 +127,7 @@ object TemplateCatalog {
         RoutineTemplate(
             id = "template_leaving_home",
             name = "Leaving Home",
-            category = "Location",
+            category = "Connectivity",
             description = "Boost brightness and prepare outdoor settings when disconnected from home Wi-Fi.",
             iconName = "DirectionsWalk",
             colorHex = "#F59E0B",

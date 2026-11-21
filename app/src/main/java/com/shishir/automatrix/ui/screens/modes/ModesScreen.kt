@@ -191,10 +191,7 @@ private fun CreateModeSheet(
     var modeDescription by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
     var selectedIcon by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("AutoAwesome") }
 
-    val iconOptions = listOf(
-        "AutoAwesome", "Bedtime", "Work", "School", "DirectionsCar", "Flight",
-        "Headphones", "Wifi", "BatteryAlert", "SportsEsports", "Schedule", "Tune"
-    )
+    val iconOptions = IconHelper.PRESET_ICONS
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

@@ -200,6 +200,12 @@ class FlowViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateModeActions(mode: Mode, actions: List<com.shishir.automatrix.domain.models.AutomationAction>) {
+        viewModelScope.launch {
+            repository.upsertMode(mode.copy(actions = actions))
+        }
+    }
+
     fun toggleModeActive(mode: Mode) {
         viewModelScope.launch {
             val targetState = !mode.isActive
@@ -242,7 +248,9 @@ class FlowViewModel(application: Application) : AndroidViewModel(application) {
 
     fun importBackup(jsonString: String) {
         viewModelScope.launch(Dispatchers.Default) {
-            when (val result = BackupManager.importRoutinesFromJson(jsonString)) {
+            // Accept raw backup JSON or a shared share code
+            val payload = com.shishir.automatrix.util.ShareCodec.decode(jsonString) ?: jsonString
+            when (val result = BackupManager.importRoutinesFromJson(payload)) {
                 is BackupManager.ImportResult.Success -> {
                     result.routines.forEach { r ->
                         repository.upsertRoutine(r)

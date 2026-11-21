@@ -69,23 +69,31 @@ class FlowWidgetProvider : AppWidgetProvider() {
                         views.setTextViewText(R.id.widget_subtext, "Tap any mode below to start focusing")
                     }
 
-                    // Button 1: Work Mode
-                    views.setOnClickPendingIntent(
-                        R.id.widget_btn_work,
-                        createModeToggleIntent(context, "mode_work", 1)
+                    // Three dynamic slots showing the first modes in the library
+                    val slotIds = listOf(
+                        R.id.widget_btn_mode_1,
+                        R.id.widget_btn_mode_2,
+                        R.id.widget_btn_mode_3
                     )
-
-                    // Button 2: Study Mode
-                    views.setOnClickPendingIntent(
-                        R.id.widget_btn_study,
-                        createModeToggleIntent(context, "mode_study", 2)
-                    )
-
-                    // Button 3: Sleep Mode
-                    views.setOnClickPendingIntent(
-                        R.id.widget_btn_sleep,
-                        createModeToggleIntent(context, "mode_sleep", 3)
-                    )
+                    val visibleModes = modes.take(3)
+                    slotIds.forEachIndexed { index, slotId ->
+                        val mode = visibleModes.getOrNull(index)
+                        if (mode == null) {
+                            views.setViewVisibility(slotId, android.view.View.GONE)
+                        } else {
+                            views.setViewVisibility(slotId, android.view.View.VISIBLE)
+                            views.setTextViewText(slotId, mode.name)
+                            views.setInt(
+                                slotId,
+                                "setBackgroundResource",
+                                if (mode.isActive) R.drawable.widget_btn_active_bg else R.drawable.widget_btn_bg
+                            )
+                            views.setOnClickPendingIntent(
+                                slotId,
+                                createModeToggleIntent(context, mode.id, mode.id.hashCode())
+                            )
+                        }
+                    }
 
                     // Button 4: Turn Off
                     val turnOffIntent = Intent(context, FlowWidgetProvider::class.java).apply {

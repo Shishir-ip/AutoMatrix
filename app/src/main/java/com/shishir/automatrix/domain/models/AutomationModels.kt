@@ -63,6 +63,8 @@ enum class ActionType(
     SHOW_NOTIFICATION("Alerts", "Show Notification", "NotificationImportant"),
     EMERGENCY_ALARM("Alerts", "Emergency Alarm", "Alarm"),
     SPEAK_TEXT("Alerts", "Speak Text (Voice)", "RecordVoiceOver"),
+    SET_BATTERY_SAVER("System", "Battery Saver", "BatterySaver", requiresSpecialAccess = true, requiredAccessName = "Write Secure Settings (one-time ADB)"),
+    WAIT("Utilities", "Wait / Delay", "Timer"),
     LAUNCH_APP("Apps", "Open Application", "Launch"),
     OPEN_URL("Web", "Open Web Link", "Language"),
     TOGGLE_FLASHLIGHT("Utilities", "Toggle Flashlight", "FlashlightOn"),

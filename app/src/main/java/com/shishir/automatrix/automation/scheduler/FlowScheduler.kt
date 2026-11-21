@@ -55,4 +55,19 @@ class FlowScheduler(private val context: Context) {
             } catch (_: Exception) {}
         }
     }
+
+    /** Stops periodic evaluation — used when no routines are enabled. */
+    fun cancelScheduledEvaluation() {
+        val intent = Intent(context, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            1001,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        try {
+            alarmManager?.cancel(pendingIntent)
+        } catch (_: Exception) {
+        }
+    }
 }

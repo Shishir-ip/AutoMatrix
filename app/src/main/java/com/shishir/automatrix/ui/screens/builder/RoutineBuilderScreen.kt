@@ -114,7 +114,7 @@ fun RoutineBuilderScreen(
     val conditionConfigSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val actionConfigSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    val iconOptions = listOf("AutoAwesome", "Bedtime", "Work", "School", "DirectionsCar", "Flight", "Headphones", "Wifi", "BatteryAlert")
+    val iconOptions = IconHelper.PRESET_ICONS
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

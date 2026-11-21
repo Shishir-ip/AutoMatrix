@@ -1,5 +1,12 @@
 package com.shishir.automatrix.ui.screens.routines
 
+import androidx.compose.material3.ExperimentalMaterial3Api
+import com.shishir.automatrix.ui.components.FlowOutlinedActionButton
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,11 +48,24 @@ import com.shishir.automatrix.ui.components.FlowPrimaryButton
 import com.shishir.automatrix.ui.components.FlowPriorityBadge
 import com.shishir.automatrix.ui.components.FlowSwitch
 import com.shishir.automatrix.ui.components.IconHelper
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.text.style.TextAlign
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import com.shishir.automatrix.ui.components.QrCodeImage
+import com.shishir.automatrix.ui.components.sheetScrollWithoutDismiss
+import com.shishir.automatrix.util.ShareCodec
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineDetailScreen(
     routine: Routine?,
@@ -56,6 +76,8 @@ fun RoutineDetailScreen(
     onRunNow: () -> Unit
 ) {
     val glassColors = LocalFlowGlassColors.current
+    val context = LocalContext.current
+    var showShareSheet by remember { mutableStateOf(false) }
 
     if (routine == null) {
         Box(
@@ -237,6 +259,48 @@ fun RoutineDetailScreen(
                 }
             }
 
+            // Share routine
+            item(key = "share_card") {
+                FlowGlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { showShareSheet = true }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 18.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = null,
+                            tint = LocalFlowGlassColors.current.accent,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Share this Routine",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = glassColors.textPrimary
+                            )
+                            Text(
+                                text = "Show a QR code or send it to another device",
+                                fontSize = 12.sp,
+                                color = glassColors.textSecondary
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = glassColors.textMuted,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+
             // WHEN Conditions in single clean card
             item(key = "when_section") {
                 Column {
@@ -389,6 +453,85 @@ fun RoutineDetailScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    if (showShareSheet && routine != null) {
+        val shareCode = remember(routine.id) { ShareCodec.encode(routine) }
+        val qrFriendly = ShareCodec.isQrFriendly(shareCode)
+
+        androidx.compose.material3.ModalBottomSheet(
+            onDismissRequest = { showShareSheet = false },
+            sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = glassColors.glassSurface,
+            tonalElevation = 0.dp,
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .sheetScrollWithoutDismiss()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Share " + '"' + routine.name + '"',
+                    style = MaterialTheme.typography.titleLarge,
+                    color = glassColors.textPrimary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "The routine imports disabled — review it before enabling.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = glassColors.textSecondary
+                )
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                if (qrFriendly) {
+                    QrCodeImage(content = shareCode, size = 240.dp)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "Scan with any QR scanner, or open it on a device with AutoMatrix installed",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = glassColors.textMuted,
+                        textAlign = TextAlign.Center
+                    )
+                } else {
+                    Text(
+                        text = "This routine is too large for a QR code — use the buttons below instead.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = glassColors.textSecondary,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                FlowOutlinedActionButton(
+                    text = "Copy share code",
+                    onClick = {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("AutoMatrix Routine", shareCode))
+                        showShareSheet = false
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                FlowOutlinedActionButton(
+                    text = "Share via apps",
+                    onClick = {
+                        val send = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, shareCode)
+                        }
+                        context.startActivity(Intent.createChooser(send, "Share routine"))
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }

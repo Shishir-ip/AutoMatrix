@@ -437,7 +437,10 @@ fun FlowAppContent(
                     mode = selectedMode,
                     onNavigateBack = { navController.popBackStack() },
                     onToggleMode = { viewModel.toggleModeActive(it) },
-                    onDeleteMode = { viewModel.deleteMode(it) }
+                    onDeleteMode = { viewModel.deleteMode(it) },
+                    onUpdateModeActions = { mode, actions ->
+                        viewModel.updateModeActions(mode, actions)
+                    }
                 )
             }
         }

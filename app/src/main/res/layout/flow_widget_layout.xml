@@ -70,40 +70,46 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/widget_btn_work"
+            android:id="@+id/widget_btn_mode_1"
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_marginEnd="4dp"
             android:layout_weight="1"
             android:background="@drawable/widget_btn_bg"
             android:gravity="center"
-            android:text="@string/mode_work"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:visibility="gone"
             android:textColor="#F2F2F7"
             android:textSize="12sp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/widget_btn_study"
+            android:id="@+id/widget_btn_mode_2"
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_marginHorizontal="2dp"
             android:layout_weight="1"
             android:background="@drawable/widget_btn_bg"
             android:gravity="center"
-            android:text="@string/mode_study"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:visibility="gone"
             android:textColor="#F2F2F7"
             android:textSize="12sp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/widget_btn_sleep"
+            android:id="@+id/widget_btn_mode_3"
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_marginHorizontal="2dp"
             android:layout_weight="1"
             android:background="@drawable/widget_btn_bg"
             android:gravity="center"
-            android:text="@string/mode_sleep"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:visibility="gone"
             android:textColor="#F2F2F7"
             android:textSize="12sp"
             android:textStyle="bold" />

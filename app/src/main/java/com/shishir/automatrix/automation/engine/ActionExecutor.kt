@@ -238,6 +238,47 @@ object ActionExecutor {
                     }
                 }
 
+                ActionType.SET_BATTERY_SAVER -> {
+                    val enable = config.optBoolean("enable", true)
+                    val resolver = context.contentResolver
+                    val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+                        context,
+                        android.Manifest.permission.WRITE_SECURE_SETTINGS
+                    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                    if (!granted) {
+                        ActionResult.Failure(
+                            reason = "One-time setup needed: grant Write Secure Settings with ADB: " +
+                                    "adb shell pm grant com.shishir.automatrix android.permission.WRITE_SECURE_SETTINGS",
+                            canOpenSettings = false
+                        )
+                    } else {
+                        try {
+                            Settings.Global.putInt(
+                                resolver,
+                                "low_power",
+                                if (enable) 1 else 0
+                            )
+                            ActionResult.Success(
+                                if (enable) "Battery Saver turned ON"
+                                else "Battery Saver turned OFF"
+                            )
+                        } catch (e: SecurityException) {
+                            ActionResult.Failure(
+                                reason = "Write Secure Settings was revoked. Re-grant with ADB: " +
+                                        "adb shell pm grant com.shishir.automatrix android.permission.WRITE_SECURE_SETTINGS",
+                                canOpenSettings = false
+                            )
+                        } catch (e: Exception) {
+                            ActionResult.Failure("Could not change Battery Saver: ${e.localizedMessage}")
+                        }
+                    }
+                }
+
+                ActionType.WAIT -> {
+                    // Handled by the engine's action loop (suspends the chain).
+                    ActionResult.Success("Wait handled by scheduler")
+                }
+
                 ActionType.ACCESSIBILITY_NAV -> {
                     val navAction = config.optString("action", "HOME").uppercase()
                     val service = FlowAccessibilityService.instance

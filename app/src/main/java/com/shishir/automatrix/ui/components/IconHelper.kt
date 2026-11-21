@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.AirplanemodeActive
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.AirplanemodeInactive
 import androidx.compose.material.icons.filled.BatterySaver
 import androidx.compose.material.icons.filled.DoNotDisturbOff
@@ -53,6 +54,13 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.ui.graphics.vector.ImageVector
 
 object IconHelper {
+
+    /** Shared icon palette for routine and mode creation. */
+    val PRESET_ICONS = listOf(
+        "AutoAwesome", "Bedtime", "Work", "School", "DirectionsCar", "Flight",
+        "Headphones", "Wifi", "BatteryAlert", "SportsEsports", "Schedule", "Tune"
+    )
+
     fun getIconByName(iconName: String): ImageVector {
         return when (iconName) {
             "Bedtime" -> Icons.Default.Bedtime
@@ -103,6 +111,7 @@ object IconHelper {
             "DoNotDisturbOff" -> Icons.Default.DoNotDisturbOff
             "Alarm" -> Icons.Default.Alarm
             "RecordVoiceOver" -> Icons.Default.RecordVoiceOver
+            "Timer" -> Icons.Default.Timer
             else -> Icons.Default.AutoAwesome
         }
     }

@@ -268,5 +268,21 @@ private fun createDefaultAction(type: ActionType): AutomationAction {
             summary = "Automation triggered",
             configJson = """{"text":"Automation triggered","alarmStream":false}"""
         )
+        ActionType.SET_BATTERY_SAVER -> AutomationAction(
+            id = id,
+            routineId = "",
+            type = type,
+            title = type.displayName,
+            summary = "Battery Saver ON",
+            configJson = """{"enable":true}"""
+        )
+        ActionType.WAIT -> AutomationAction(
+            id = id,
+            routineId = "",
+            type = type,
+            title = type.displayName,
+            summary = "Wait 30 seconds",
+            configJson = """{"durationSec":30}"""
+        )
     }
 }
