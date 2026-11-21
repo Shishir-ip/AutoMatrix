@@ -29,6 +29,8 @@ import org.json.JSONObject
 object ActionExecutor {
 
     private const val CHANNEL_ID = "automatrix_automations"
+    private const val ALARM_CHANNEL_ID = "automatrix_alarm"
+    private const val ALARM_NOTIFICATION_ID = 3002
 
     private var emergencyPlayer: MediaPlayer? = null
     private var previousAlarmVolume = -1
@@ -220,7 +222,8 @@ object ActionExecutor {
 
                 ActionType.EMERGENCY_ALARM -> {
                     val durationSec = config.optInt("durationSec", 30).coerceIn(5, 300)
-                    playEmergencyAlarm(context, durationSec)
+                    val ringtoneUri = config.optString("ringtoneUri", "").trim()
+                    playEmergencyAlarm(context, durationSec, ringtoneUri)
                     ActionResult.Success("Emergency alarm ringing for $durationSec s (alarm stream at max volume)")
                 }
 
@@ -267,11 +270,12 @@ object ActionExecutor {
     }
 
     /**
-     * Rings the alarm tone on the ALARM stream at maximum volume. The alarm
-     * stream is unaffected by the ringer being silent, so this works even
-     * when the phone is muted. Volume is restored afterwards.
+     * Rings the chosen (or default) alarm tone on the ALARM stream at maximum
+     * volume. The alarm stream is unaffected by the ringer being silent, so
+     * this works even when the phone is muted. A notification with a Stop
+     * action is posted while ringing; volume is restored afterwards.
      */
-    private fun playEmergencyAlarm(context: Context, durationSec: Int) {
+    private fun playEmergencyAlarm(context: Context, durationSec: Int, ringtoneUri: String) {
         stopEmergencyAlarm()
 
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
@@ -284,14 +288,18 @@ object ActionExecutor {
             )
         }
 
-        val ringtoneUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        val uri: Uri = try {
+            if (ringtoneUri.isNotBlank()) Uri.parse(ringtoneUri) else null
+        } catch (_: Exception) {
+            null
+        } ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val player = MediaPlayer()
         emergencyPlayer = player
         try {
-            player.setDataSource(context, ringtoneUri)
+            player.setDataSource(context, uri)
             player.setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ALARM)
@@ -311,23 +319,79 @@ object ActionExecutor {
             return
         }
 
+        showAlarmStopNotification(context, durationSec)
+
         mainHandler.postDelayed({
-            stopEmergencyAlarm()
+            stopEmergencyAlarm(context)
         }, durationSec * 1000L)
     }
 
-    private fun stopEmergencyAlarm() {
-        val player = emergencyPlayer ?: return
-        emergencyPlayer = null
-        try {
-            player.stop()
-        } catch (_: Exception) {
+    fun stopEmergencyAlarm(context: Context? = null) {
+        val appContext = (context ?: contextRef?.get())?.applicationContext
+        val player = emergencyPlayer
+        if (player != null) {
+            emergencyPlayer = null
+            try {
+                player.stop()
+            } catch (_: Exception) {
+            }
+            try {
+                player.release()
+            } catch (_: Exception) {
+            }
+            mainHandler.removeCallbacksAndMessages(null)
         }
-        try {
-            player.release()
-        } catch (_: Exception) {
+        if (appContext != null) {
+            cancelAlarmStopNotification(appContext)
+            val audioManager = appContext.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+            restoreAlarmVolume(audioManager)
         }
-        mainHandler.removeCallbacksAndMessages(null)
+    }
+
+    private var contextRef: java.lang.ref.WeakReference<Context>? = null
+
+    private fun showAlarmStopNotification(context: Context, durationSec: Int) {
+        contextRef = java.lang.ref.WeakReference(context.applicationContext)
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationManager.createNotificationChannel(
+                NotificationChannel(
+                    ALARM_CHANNEL_ID,
+                    "Emergency Alarm",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Shows a stop control while the emergency alarm is ringing"
+                    setSound(null, null)
+                }
+            )
+        }
+
+        val stopIntent = Intent(context, com.shishir.automatrix.automation.receivers.AlarmStopReceiver::class.java)
+        val stopPending = PendingIntent.getBroadcast(
+            context,
+            3001,
+            stopIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, ALARM_CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setContentTitle("Emergency alarm ringing")
+            .setContentText("Tap Stop to silence it now")
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Stop", stopPending)
+            .build()
+
+        notificationManager.notify(ALARM_NOTIFICATION_ID, notification)
+    }
+
+    private fun cancelAlarmStopNotification(context: Context) {
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+        notificationManager?.cancel(ALARM_NOTIFICATION_ID)
     }
 
     private fun restoreAlarmVolume(audioManager: AudioManager?) {

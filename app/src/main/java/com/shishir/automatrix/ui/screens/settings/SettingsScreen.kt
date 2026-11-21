@@ -121,6 +121,9 @@ fun SettingsScreen(
     var importInputText by remember { mutableStateOf("") }
     var isCheckingUpdate by remember { mutableStateOf(false) }
     var updateResult by remember { mutableStateOf<UpdateChecker.Result?>(null) }
+    var downloadProgress by remember { mutableStateOf(-1) }
+    var downloadedApk by remember { mutableStateOf<java.io.File?>(null) }
+    var updateJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
 
     val hasBatteryExemption = remember {
         PermissionManager.checkBatteryOptimizationIgnored(context)
@@ -576,62 +579,169 @@ fun SettingsScreen(
         }
     }
 
-    when (val result = updateResult) {
-        is UpdateChecker.Result.UpdateAvailable -> {
-            AlertDialog(
-                onDismissRequest = { updateResult = null },
-                title = { Text("Update Available") },
-                text = {
-                    Text("AutoMatrix ${result.latestVersion} is available. You are on ${com.shishir.automatrix.BuildConfig.VERSION_NAME}.")
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            context.startActivity(
-                                Intent(Intent.ACTION_VIEW, android.net.Uri.parse(result.releaseUrl))
-                            )
+    updateResult?.let { result ->
+        when (result) {
+            is UpdateChecker.Result.UpdateAvailable -> {
+                val whatsNew = result.whatsNew
+                    .replace(Regex("^#+\\s?", RegexOption.MULTILINE), "")
+                    .replace("**", "")
+                    .replace("|", "  ")
+                    .trim()
+                val preview = if (whatsNew.length > 480) {
+                    whatsNew.take(480).trimEnd() + "\u2026"
+                } else whatsNew
+
+                AlertDialog(
+                    onDismissRequest = {
+                        if (downloadProgress < 0) {
                             updateResult = null
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = glassColors.accent,
-                            contentColor = if (glassColors.accent == Color.White) Color.Black else Color.White
-                        )
-                    ) {
-                        Text("View Release")
+                        }
+                    },
+                    title = { Text("Update ${result.latestVersion} Available") },
+                    text = {
+                        Column {
+                            if (downloadProgress >= 0) {
+                                Text(
+                                    text = "Downloading update\u2026 $downloadProgress%",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = glassColors.textPrimary
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                androidx.compose.material3.LinearProgressIndicator(
+                                    progress = { downloadProgress / 100f },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = glassColors.accent,
+                                    trackColor = glassColors.glassBorder
+                                )
+                            } else if (downloadedApk != null) {
+                                Text(
+                                    text = "Version ${result.latestVersion} downloaded and ready to install.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = glassColors.textPrimary
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "You'll be asked to allow installs from this app the first time.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = glassColors.textSecondary
+                                )
+                            } else {
+                                Text(
+                                    text = "What's new in ${result.latestVersion}:",
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                    color = glassColors.textPrimary
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = preview,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = glassColors.textSecondary
+                                )
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        when {
+                            downloadProgress >= 0 -> {
+                                TextButton(onClick = {
+                                    updateJob?.cancel()
+                                    downloadProgress = -1
+                                    updateResult = null
+                                }) { Text("Hide") }
+                            }
+                            downloadedApk != null -> {
+                                Button(
+                                    onClick = {
+                                        val uri = androidx.core.content.FileProvider.getUriForFile(
+                                            context,
+                                            context.packageName + ".fileprovider",
+                                            downloadedApk!!
+                                        )
+                                        val installIntent = Intent(Intent.ACTION_VIEW)
+                                            .setDataAndType(uri, "application/vnd.android.package-archive")
+                                            .addFlags(
+                                                Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                                                        Intent.FLAG_ACTIVITY_NEW_TASK
+                                            )
+                                        context.startActivity(installIntent)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = glassColors.accent,
+                                        contentColor = if (glassColors.accent == Color.White) Color.Black else Color.White
+                                    )
+                                ) { Text("Install Now") }
+                            }
+                            else -> {
+                                Button(
+                                    onClick = {
+                                        updateJob = scope.launch {
+                                            downloadProgress = 0
+                                            val file = UpdateChecker.downloadApk(
+                                                context,
+                                                result.apkUrl
+                                            ) { p -> downloadProgress = p }
+                                            downloadProgress = -1
+                                            if (file != null) {
+                                                downloadedApk = file
+                                            } else {
+                                                updateResult = UpdateChecker.Result.Failed(
+                                                    "Download failed — check your connection and try again."
+                                                )
+                                            }
+                                        }
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = glassColors.accent,
+                                        contentColor = if (glassColors.accent == Color.White) Color.Black else Color.White
+                                    )
+                                ) { Text("Download Update") }
+                            }
+                        }
+                    },
+                    dismissButton = {
+                        if (downloadProgress < 0) {
+                            Row {
+                                TextButton(
+                                    onClick = {
+                                        context.startActivity(
+                                            Intent(
+                                                Intent.ACTION_VIEW,
+                                                android.net.Uri.parse(result.releaseUrl)
+                                            )
+                                        )
+                                    }
+                                ) { Text("Full Changelog") }
+                                TextButton(onClick = { updateResult = null }) { Text("Later") }
+                            }
+                        }
                     }
-                },
-                dismissButton = {
-                    TextButton(onClick = { updateResult = null }) {
-                        Text("Later")
+                )
+            }
+            is UpdateChecker.Result.UpToDate -> {
+                AlertDialog(
+                    onDismissRequest = { updateResult = null },
+                    title = { Text("You're Up to Date") },
+                    text = { Text("AutoMatrix ${com.shishir.automatrix.BuildConfig.VERSION_NAME} is the latest version.") },
+                    confirmButton = {
+                        TextButton(onClick = { updateResult = null }) {
+                            Text("OK")
+                        }
                     }
-                }
-            )
+                )
+            }
+            is UpdateChecker.Result.Failed -> {
+                AlertDialog(
+                    onDismissRequest = { updateResult = null },
+                    title = { Text("Update Check Failed") },
+                    text = { Text(result.message ?: "Please check your internet connection and try again.") },
+                    confirmButton = {
+                        TextButton(onClick = { updateResult = null }) {
+                            Text("OK")
+                        }
+                    }
+                )
+            }
         }
-        is UpdateChecker.Result.UpToDate -> {
-            AlertDialog(
-                onDismissRequest = { updateResult = null },
-                title = { Text("You're Up to Date") },
-                text = { Text("AutoMatrix ${com.shishir.automatrix.BuildConfig.VERSION_NAME} is the latest version.") },
-                confirmButton = {
-                    TextButton(onClick = { updateResult = null }) {
-                        Text("OK")
-                    }
-                }
-            )
-        }
-        is UpdateChecker.Result.Failed -> {
-            AlertDialog(
-                onDismissRequest = { updateResult = null },
-                title = { Text("Update Check Failed") },
-                text = { Text(result.message ?: "Please check your internet connection and try again.") },
-                confirmButton = {
-                    TextButton(onClick = { updateResult = null }) {
-                        Text("OK")
-                    }
-                }
-            )
-        }
-        null -> Unit
     }
 }
 

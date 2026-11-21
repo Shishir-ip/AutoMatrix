@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Tune
@@ -57,7 +58,10 @@ import com.shishir.automatrix.ui.components.FlowSwitch
 import com.shishir.automatrix.ui.components.IconHelper
 import com.shishir.automatrix.ui.motion.FlowHaptics
 import com.shishir.automatrix.ui.motion.FlowMotion
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
+import com.shishir.automatrix.ui.theme.StatusError
 import com.shishir.automatrix.ui.theme.StatusSuccess
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -67,11 +71,13 @@ import java.util.Locale
 fun ModeDetailScreen(
     mode: Mode?,
     onNavigateBack: () -> Unit,
-    onToggleMode: (Mode) -> Unit
+    onToggleMode: (Mode) -> Unit,
+    onDeleteMode: (Mode) -> Unit = {}
 ) {
     val glassColors = LocalFlowGlassColors.current
     val hapticFeedback = LocalHapticFeedback.current
     val view = LocalView.current
+    var showDeleteConfirm by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
     if (mode == null) {
         Box(
@@ -415,6 +421,58 @@ fun ModeDetailScreen(
                     }
                 }
             }
+
+            // Delete mode
+            item(key = "delete_mode") {
+                FlowGlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { showDeleteConfirm = true }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 18.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = null,
+                            tint = StatusError,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Delete Mode",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = StatusError
+                        )
+                    }
+                }
+            }
         }
+    }
+
+    if (showDeleteConfirm && mode != null) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Delete \"${mode.name}\"?") },
+            text = {
+                Text("This mode and its actions will be permanently removed from this device.")
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    showDeleteConfirm = false
+                    onDeleteMode(mode)
+                    onNavigateBack()
+                }) {
+                    Text("Delete", color = StatusError)
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }

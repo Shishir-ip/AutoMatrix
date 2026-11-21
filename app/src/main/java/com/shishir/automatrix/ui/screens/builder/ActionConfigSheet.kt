@@ -19,9 +19,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import android.media.RingtoneManager
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -60,6 +65,7 @@ import com.shishir.automatrix.ui.components.FlowSlider
 import com.shishir.automatrix.ui.components.FlowSwitch
 import com.shishir.automatrix.ui.components.IconHelper
 import com.shishir.automatrix.ui.components.pickers.AppPickerSheet
+import androidx.compose.ui.platform.LocalContext
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
 import org.json.JSONObject
 
@@ -119,6 +125,11 @@ fun ActionConfigSheet(
 
     // Emergency alarm
     var alarmDurationSec by remember { mutableFloatStateOf(parsedConfig.optInt("durationSec", 30).toFloat()) }
+    var alarmRingtoneUri by remember { mutableStateOf(parsedConfig.optString("ringtoneUri", "")) }
+    var alarmRingtoneTitle by remember {
+        mutableStateOf(parsedConfig.optString("ringtoneTitle", "Default alarm sound").ifBlank { "Default alarm sound" })
+    }
+    var showRingtonePicker by remember { mutableStateOf(false) }
 
     // Speak text
     var speakText by remember { mutableStateOf(parsedConfig.optString("text", "Automation triggered")) }
@@ -528,7 +539,7 @@ fun ActionConfigSheet(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Plays the alarm tone on the alarm stream at maximum volume — audible even when the phone is silent",
+                        text = "Plays on the alarm stream at maximum volume — audible even when the phone is silent. A notification with a Stop button appears while it rings.",
                         style = MaterialTheme.typography.bodySmall,
                         color = glassColors.textSecondary
                     )
@@ -545,6 +556,51 @@ fun ActionConfigSheet(
                         steps = 22,
                         modifier = Modifier.fillMaxWidth()
                     )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Text(
+                        text = "Alarm Sound",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                        color = glassColors.textPrimary
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    FlowGlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { showRingtonePicker = true }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Alarm,
+                                contentDescription = null,
+                                tint = LocalFlowGlassColors.current.accent,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = alarmRingtoneTitle,
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                    color = glassColors.textPrimary
+                                )
+                                Text(
+                                    text = "Tap to choose from system alarm sounds",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = glassColors.textSecondary
+                                )
+                            }
+                            Icon(
+                                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = glassColors.textMuted,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
                 }
 
                 ActionType.SPEAK_TEXT -> {
@@ -752,7 +808,9 @@ fun ActionConfigSheet(
                         }
                         ActionType.EMERGENCY_ALARM -> {
                             newConfig.put("durationSec", alarmDurationSec.toInt())
-                            newSummary = "Loud alarm · ${alarmDurationSec.toInt()} s"
+                            newConfig.put("ringtoneUri", alarmRingtoneUri)
+                            newConfig.put("ringtoneTitle", alarmRingtoneTitle)
+                            newSummary = "$alarmRingtoneTitle · ${alarmDurationSec.toInt()} s"
                         }
                         ActionType.SPEAK_TEXT -> {
                             newConfig.put("text", speakText)
@@ -784,6 +842,73 @@ fun ActionConfigSheet(
                 appPackage = pkg
                 appLabel = name
                 showAppPicker = false
+            }
+        )
+    }
+
+    if (showRingtonePicker) {
+        val context = LocalContext.current
+        val alarmSounds = remember {
+            buildList {
+                try {
+                    val manager = RingtoneManager(context)
+                    manager.setType(RingtoneManager.TYPE_ALARM)
+                    val cursor = manager.cursor
+                    while (cursor.moveToNext()) {
+                        val titleIdx = cursor.getColumnIndex("title")
+                        val title = if (titleIdx >= 0) cursor.getString(titleIdx) else null ?: continue
+                        val uri = manager.getRingtoneUri(cursor.position).toString()
+                        add(title to uri)
+                    }
+                } catch (_: Exception) {
+                }
+            }
+        }
+
+        AlertDialog(
+            onDismissRequest = { showRingtonePicker = false },
+            title = { Text("Alarm Sound") },
+            text = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    Text(
+                        text = "Default alarm sound",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (alarmRingtoneUri.isBlank()) glassColors.accent else glassColors.textPrimary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                alarmRingtoneUri = ""
+                                alarmRingtoneTitle = "Default alarm sound"
+                                showRingtonePicker = false
+                            }
+                            .padding(vertical = 10.dp)
+                    )
+                    alarmSounds.forEach { (title, uri) ->
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (alarmRingtoneUri == uri) glassColors.accent else glassColors.textPrimary,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    alarmRingtoneUri = uri
+                                    alarmRingtoneTitle = title
+                                    showRingtonePicker = false
+                                }
+                                .padding(vertical = 10.dp)
+                        )
+                    }
+                    if (alarmSounds.isEmpty()) {
+                        Text(
+                            text = "No system alarm sounds found on this device — the default alarm tone will be used.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = glassColors.textSecondary
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showRingtonePicker = false }) { Text("Done") }
             }
         )
     }

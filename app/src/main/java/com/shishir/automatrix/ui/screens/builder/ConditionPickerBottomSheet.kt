@@ -42,10 +42,12 @@ import com.shishir.automatrix.domain.models.ConditionType
 import com.shishir.automatrix.ui.components.FlowRowItem
 import com.shishir.automatrix.ui.components.sheetScrollWithoutDismiss
 import com.shishir.automatrix.ui.components.IconHelper
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.isImeVisible
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
 import java.util.UUID
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun ConditionPickerBottomSheet(
     sheetState: SheetState,
@@ -54,6 +56,14 @@ fun ConditionPickerBottomSheet(
 ) {
     val glassColors = LocalFlowGlassColors.current
     var searchQuery by remember { mutableStateOf("") }
+
+    // Back with the keyboard open only hides the keyboard — a second back
+    // press then closes the sheet itself.
+    val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    val imeVisible = WindowInsets.isImeVisible
+    androidx.activity.compose.BackHandler(enabled = imeVisible) {
+        keyboardController?.hide()
+    }
 
     // Location geofence is hidden: it has no live location source yet
     val allConditions = remember { ConditionType.entries.filter { it != ConditionType.LOCATION_GEOFENCE } }

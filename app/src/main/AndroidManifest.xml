@@ -21,6 +21,8 @@
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <!-- The only network use: the manual "Check for Updates" action in Settings -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Lets the in-app updater hand the downloaded APK to the system installer -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <uses-feature
         android:name="android.hardware.nfc"
@@ -83,6 +85,10 @@
             android:name=".automation.receivers.AlarmReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name=".automation.receivers.AlarmStopReceiver"
+            android:exported="false" />
+
         <service
             android:name=".automation.services.FlowAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
@@ -140,6 +146,15 @@
                 <action android:name="com.shishir.automatrix.action.NOTIFICATION_MUTE_30M" />
             </intent-filter>
         </receiver>
+            <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.shishir.automatrix.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

@@ -30,6 +30,19 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.shishir.automatrix.ui.components.FlowPrimaryButton
+import com.shishir.automatrix.ui.components.sheetScrollWithoutDismiss
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -54,16 +67,22 @@ import com.shishir.automatrix.domain.models.Mode
 import com.shishir.automatrix.ui.components.IconHelper
 import com.shishir.automatrix.ui.motion.FlowHaptics
 import com.shishir.automatrix.ui.motion.FlowMotion
+import androidx.compose.runtime.setValue
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
 import com.shishir.automatrix.ui.theme.StatusSuccess
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun ModesScreen(
     modes: List<Mode>,
     onToggleMode: (Mode) -> Unit,
-    onNavigateToModeDetail: (String) -> Unit = {}
+    onNavigateToModeDetail: (String) -> Unit = {},
+    onCreateMode: (String, String, String) -> Unit = { _, _, _ -> }
 ) {
     val glassColors = LocalFlowGlassColors.current
+    val hapticFeedback = LocalHapticFeedback.current
+    val view = LocalView.current
+    var showCreateSheet by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -98,6 +117,189 @@ fun ModesScreen(
                 mode = mode,
                 onToggleMode = onToggleMode,
                 onClick = { onNavigateToModeDetail(mode.id) }
+            )
+        }
+
+        // New mode card
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(glassColors.accent.copy(alpha = 0.06f))
+                    .border(1.dp, glassColors.glassBorder, RoundedCornerShape(18.dp))
+                    .clickable(
+                        role = Role.Button,
+                        onClick = {
+                            FlowHaptics.tick(hapticFeedback, view)
+                            showCreateSheet = true
+                        }
+                    )
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(glassColors.accent.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            tint = glassColors.accent,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "New Mode",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 15.sp
+                        ),
+                        color = glassColors.textPrimary
+                    )
+                }
+            }
+        }
+    }
+
+    if (showCreateSheet) {
+        CreateModeSheet(
+            onDismiss = { showCreateSheet = false },
+            onCreate = { name, icon, description ->
+                onCreateMode(name, icon, description)
+                showCreateSheet = false
+            }
+        )
+    }
+}
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun CreateModeSheet(
+    onDismiss: () -> Unit,
+    onCreate: (String, String, String) -> Unit
+) {
+    val glassColors = LocalFlowGlassColors.current
+    val hapticFeedback = LocalHapticFeedback.current
+    val view = LocalView.current
+    var modeName by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
+    var modeDescription by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
+    var selectedIcon by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("AutoAwesome") }
+
+    val iconOptions = listOf(
+        "AutoAwesome", "Bedtime", "Work", "School", "DirectionsCar", "Flight",
+        "Headphones", "Wifi", "BatteryAlert", "SportsEsports", "Schedule", "Tune"
+    )
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = glassColors.glassSurface,
+        tonalElevation = 0.dp,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .sheetScrollWithoutDismiss()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 28.dp)
+        ) {
+            Text(
+                text = "New Mode",
+                style = MaterialTheme.typography.titleLarge,
+                color = glassColors.textPrimary
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "A mode is a one-tap profile that applies a set of device actions.",
+                style = MaterialTheme.typography.bodySmall,
+                color = glassColors.textSecondary
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = modeName,
+                onValueChange = { modeName = it },
+                label = { Text("Mode Name") },
+                placeholder = { Text("e.g. Reading, Gym, Focus Time") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = glassColors.accent,
+                    unfocusedBorderColor = glassColors.glassBorder
+                )
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = modeDescription,
+                onValueChange = { modeDescription = it },
+                label = { Text("Description (optional)") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = glassColors.accent,
+                    unfocusedBorderColor = glassColors.glassBorder
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Icon",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = glassColors.textPrimary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(iconOptions) { iconName ->
+                    val isSelected = iconName == selectedIcon
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(RoundedCornerShape(11.dp))
+                            .background(if (isSelected) glassColors.accent else glassColors.glassSurface)
+                            .border(
+                                1.dp,
+                                if (isSelected) glassColors.accent else glassColors.glassBorder,
+                                RoundedCornerShape(11.dp)
+                            )
+                            .clickable {
+                                FlowHaptics.selection(hapticFeedback, view)
+                                selectedIcon = iconName
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = IconHelper.getIconByName(iconName),
+                            contentDescription = null,
+                            tint = if (isSelected) {
+                                if (glassColors.accent == Color.White) Color.Black else Color.White
+                            } else glassColors.textSecondary,
+                            modifier = Modifier.size(21.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            FlowPrimaryButton(
+                text = "Create Mode",
+                enabled = modeName.isNotBlank(),
+                onClick = { onCreate(modeName, selectedIcon, modeDescription) },
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }

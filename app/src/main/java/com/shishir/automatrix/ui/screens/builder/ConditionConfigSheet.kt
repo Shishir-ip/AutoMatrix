@@ -1,6 +1,7 @@
 package com.shishir.automatrix.ui.screens.builder
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -138,6 +140,26 @@ fun ConditionConfigSheet(
     // NFC Tag fields
     var nfcTagId by remember { mutableStateOf(parsedConfig.optString("tagId", "")) }
     var nfcTagLabel by remember { mutableStateOf(parsedConfig.optString("label", "")) }
+
+    // Specific time picker state (recreated per sheet open)
+    val timePickerState = androidx.compose.material3.rememberTimePickerState(
+        initialHour = parsedConfig.optInt("hour", 8),
+        initialMinute = parsedConfig.optInt("minute", 0),
+        is24Hour = false
+    )
+
+    // Days of week selection (Calendar.DAY_OF_WEEK values: 1=Sun ... 7=Sat)
+    var selectedDays by remember(condition.id) {
+        val initial = try {
+            val arr = parsedConfig.optJSONArray("days")
+            val set = mutableSetOf<Int>()
+            for (i in 0 until (arr?.length() ?: 0)) set.add(arr!!.getInt(i))
+            if (set.isEmpty()) setOf(2, 3, 4, 5, 6) else set
+        } catch (_: Exception) {
+            setOf(2, 3, 4, 5, 6)
+        }
+        mutableStateOf(initial)
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -689,6 +711,75 @@ fun ConditionConfigSheet(
                     )
                 }
 
+                ConditionType.TIME_SPECIFIC -> {
+                    Text(
+                        text = "Runs at exactly this time of day. The engine checks every few minutes, so it fires within about 2 minutes of the target time.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = glassColors.textSecondary
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    TimePicker(state = timePickerState)
+                }
+
+                ConditionType.DAYS_OF_WEEK -> {
+                    Text(
+                        text = "Runs only on the selected days",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = glassColors.textSecondary
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    val dayLabels = listOf(
+                        2 to "Mon", 3 to "Tue", 4 to "Wed", 5 to "Thu",
+                        6 to "Fri", 7 to "Sat", 1 to "Sun"
+                    )
+                    listOf(dayLabels.take(4), dayLabels.drop(4)).forEach { rowDays ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            rowDays.forEach { (dayInt, label) ->
+                                val isSelected = dayInt in selectedDays
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(
+                                            if (isSelected) glassColors.accent
+                                            else glassColors.glassSurface
+                                        )
+                                        .border(
+                                            1.dp,
+                                            if (isSelected) glassColors.accent else glassColors.glassBorder,
+                                            RoundedCornerShape(10.dp)
+                                        )
+                                        .clickable {
+                                            selectedDays = if (isSelected) {
+                                                selectedDays - dayInt
+                                            } else {
+                                                selectedDays + dayInt
+                                            }
+                                        }
+                                        .padding(vertical = 10.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = label,
+                                        fontSize = 13.sp,
+                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                                        color = if (isSelected) {
+                                            if (glassColors.accent == androidx.compose.ui.graphics.Color.White)
+                                                androidx.compose.ui.graphics.Color.Black
+                                            else androidx.compose.ui.graphics.Color.White
+                                        } else glassColors.textSecondary
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
                 else -> {
                     Text(
                         text = "This trigger activates automatically based on hardware/system state.",
@@ -779,6 +870,30 @@ fun ConditionConfigSheet(
                                 "NFC Tag: \"$nfcTagId\""
                             } else {
                                 "Any AutoMatrix NFC Tag"
+                            }
+                        }
+                        ConditionType.TIME_SPECIFIC -> {
+                            newConfig.put("hour", timePickerState.hour)
+                            newConfig.put("minute", timePickerState.minute)
+                            val h12 = run {
+                                val h = timePickerState.hour % 12
+                                if (h == 0) 12 else h
+                            }
+                            val amPm = if (timePickerState.hour < 12) "AM" else "PM"
+                            newSummary = "$h12:" + "%02d".format(timePickerState.minute) + " " + amPm
+                        }
+                        ConditionType.DAYS_OF_WEEK -> {
+                            val arr = org.json.JSONArray()
+                            selectedDays.sorted().forEach { arr.put(it) }
+                            newConfig.put("days", arr)
+                            val names = mapOf(
+                                2 to "Mon", 3 to "Tue", 4 to "Wed", 5 to "Thu",
+                                6 to "Fri", 7 to "Sat", 1 to "Sun"
+                            )
+                            newSummary = if (selectedDays.isEmpty()) {
+                                "All days"
+                            } else {
+                                selectedDays.sorted().mapNotNull { names[it] }.joinToString(", ")
                             }
                         }
                         else -> Unit

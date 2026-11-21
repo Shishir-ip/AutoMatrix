@@ -288,6 +288,9 @@ fun FlowAppContent(
                     onToggleMode = { viewModel.toggleModeActive(it) },
                     onNavigateToModeDetail = { id ->
                         navController.navigate(Screen.ModeDetail.createRoute(id))
+                    },
+                    onCreateMode = { name, icon, description ->
+                        viewModel.createMode(name, icon, description)
                     }
                 )
             }
@@ -433,7 +436,8 @@ fun FlowAppContent(
                 ModeDetailScreen(
                     mode = selectedMode,
                     onNavigateBack = { navController.popBackStack() },
-                    onToggleMode = { viewModel.toggleModeActive(it) }
+                    onToggleMode = { viewModel.toggleModeActive(it) },
+                    onDeleteMode = { viewModel.deleteMode(it) }
                 )
             }
         }

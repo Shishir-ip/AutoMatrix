@@ -38,15 +38,15 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 ## Features
 
 **Focus Modes**
-- One-tap device profiles: Work, Study, Sleep, Driving, Gaming and custom modes
+- One-tap device profiles: Work, Study, Sleep, Driving, Gaming, Travel — **plus create your own and delete any you don't want**
 - Persistent lock-screen banner with *End Early* and *Mute 30 min* actions
 - Quick Settings tile and a home-screen widget for instant switching
 - Automatic revert: settings restore when the mode ends
 
 **Routines (Automation)**
-- Triggers: time schedules, battery level, charging state, battery saver on/off, airplane mode on/off, Do Not Disturb on/off, Wi-Fi networks, Bluetooth devices, headphone plug, screen on/off, boot completed, app launch (accessibility), NFC tags, calendar events
+- Triggers: time schedules with a visual clock picker, days of the week, battery level, charging state, battery saver on/off, airplane mode on/off, Do Not Disturb on/off, Wi-Fi networks, Bluetooth devices, headphone plug, screen on/off, boot completed, app launch (accessibility), NFC tags, calendar events
 - Conditions: combine triggers with All (AND) / Any (OR) logic and priorities
-- Actions: ringer mode, DND, media/ring volume, brightness, Wi-Fi, Bluetooth, launch app, notifications, **Emergency Alarm** (loud alarm on the alarm stream — audible even when the phone is silent), **Speak Text** (text-to-speech voice alerts), flashlight, vibration, open URL, and more — with restore-on-exit support
+- Actions: ringer mode, DND, media/ring volume, brightness, Wi-Fi, Bluetooth, launch app, notifications, **Emergency Alarm** (loud alarm on the alarm stream — audible even when the phone is silent; pick any system alarm sound, and a notification with a Stop button appears while it rings), **Speak Text** (text-to-speech voice alerts), flashlight, vibration, open URL, and more — with restore-on-exit support
 - Ready-made template gallery: Sleep Mode, Morning Routine, Battery Saver, Commute, Security Guard and others
 
 **Triggers without opening the app**
@@ -59,9 +59,9 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 - A permission watchdog notifies you when an enabled automation can't run — e.g. if accessibility gets switched off after a phone restart
 - Nothing is enabled by default: freshly installed routines are pre-built examples, all switched off until you turn them on
 - Guided **battery & startup walkthrough** for Xiaomi, Samsung, Huawei, OnePlus, Vivo and stock Android
-- In-app update check so sideloaded installs never go stale
+- **Full in-app updater**: check for updates, see what's new, download with a progress bar, and install straight from the completion prompt — full changelog one tap away
 - Optional 3-step onboarding that explains permissions up front
-- Sheets and pickers scroll smoothly and only close from their handle or close button
+- Smooth, forgiving navigation: the keyboard closes before sheets do, and opening a trigger's options always returns to the list on back
 
 **Privacy & Design**
 - Zero analytics, zero trackers, fully offline automation
@@ -74,7 +74,7 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 
 Grab the latest signed APK from [**Releases**](https://github.com/Shishir-ip/AutoMatrix/releases/latest):
 
-1. Download `AutoMatrix-v1.2.0.apk`
+1. Download `AutoMatrix-v1.3.0.apk`
 2. Open it and allow "Install unknown apps" for your browser/file manager
 3. Done — the app requests permissions progressively as you use features
 

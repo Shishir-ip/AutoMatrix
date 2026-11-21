@@ -491,7 +491,6 @@ fun RoutineBuilderScreen(
             onDismiss = { showConditionPicker = false },
             onConditionSelected = { cond ->
                 conditions.add(cond)
-                showConditionPicker = false
                 editingCondition = cond
             }
         )
@@ -503,7 +502,6 @@ fun RoutineBuilderScreen(
             onDismiss = { showActionPicker = false },
             onActionSelected = { act ->
                 actions.add(act)
-                showActionPicker = false
                 editingAction = act
             }
         )

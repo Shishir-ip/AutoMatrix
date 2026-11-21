@@ -173,6 +173,33 @@ class FlowViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun createMode(name: String, iconName: String, description: String) {
+        viewModelScope.launch {
+            val trimmed = name.trim()
+            if (trimmed.isEmpty()) {
+                _userFeedback.emit("Mode name can't be empty")
+                return@launch
+            }
+            val mode = Mode(
+                id = "mode_" + System.currentTimeMillis().toString(36),
+                name = trimmed,
+                description = description.trim(),
+                iconName = iconName,
+                colorHex = "#FFFFFF",
+                isActive = false
+            )
+            repository.upsertMode(mode)
+            _userFeedback.emit("Mode \"$trimmed\" created — tap it to add actions")
+        }
+    }
+
+    fun deleteMode(mode: Mode) {
+        viewModelScope.launch {
+            repository.deleteMode(mode.id)
+            _userFeedback.emit("Mode \"${mode.name}\" deleted")
+        }
+    }
+
     fun toggleModeActive(mode: Mode) {
         viewModelScope.launch {
             val targetState = !mode.isActive

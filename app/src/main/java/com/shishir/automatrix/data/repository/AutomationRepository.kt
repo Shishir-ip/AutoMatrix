@@ -135,6 +135,10 @@ class AutomationRepository(private val database: FlowDatabase) {
         }
     }
 
+    suspend fun deleteMode(id: String) {
+        modeDao.deleteMode(id)
+    }
+
     suspend fun upsertMode(mode: Mode) {
         val actionsArray = JSONArray()
         mode.actions.forEach { a ->
