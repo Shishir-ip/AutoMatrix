@@ -59,6 +59,7 @@ import com.shishir.automatrix.domain.models.ConditionType
 import com.shishir.automatrix.domain.models.NotificationField
 import com.shishir.automatrix.domain.models.NotificationMatchOperator
 import com.shishir.automatrix.ui.components.FlowGlassCard
+import com.shishir.automatrix.ui.components.sheetScrollWithoutDismiss
 import com.shishir.automatrix.ui.components.FlowGradientButton
 import com.shishir.automatrix.ui.components.FlowSlider
 import com.shishir.automatrix.ui.components.IconHelper
@@ -147,6 +148,7 @@ fun ConditionConfigSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .sheetScrollWithoutDismiss()
                 .padding(horizontal = 20.dp, vertical = 8.dp)
                 .verticalScroll(rememberScrollState())
         ) {

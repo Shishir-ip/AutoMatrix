@@ -47,7 +47,9 @@ class FlowGestureSensorManager(private val context: Context) : SensorEventListen
 
     var isFlipToShhhEnabled = false
     var isShakeEnabled = false
-    var flipTargetModeId = "mode_work"
+
+    /** Mode to activate on flip; blank string means trigger routines only. */
+    var flipTargetModeId = "mode_sleep"
 
     fun start() {
         if (sensorManager == null) return
@@ -130,8 +132,10 @@ class FlowGestureSensorManager(private val context: Context) : SensorEventListen
                 )
             )
 
-            // 2. Activate configured target mode (default: Work)
-            FlowModeController.activateMode(context, flipTargetModeId)
+            // 2. Activate the user-configured target mode (blank = routines only)
+            if (flipTargetModeId.isNotBlank()) {
+                FlowModeController.activateMode(context, flipTargetModeId)
+            }
         }
     }
 

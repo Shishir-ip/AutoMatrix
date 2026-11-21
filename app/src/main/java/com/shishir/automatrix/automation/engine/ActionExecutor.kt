@@ -6,9 +6,14 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.hardware.camera2.CameraManager
+import android.media.AudioAttributes
 import android.media.AudioManager
+import android.media.MediaPlayer
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -24,6 +29,10 @@ import org.json.JSONObject
 object ActionExecutor {
 
     private const val CHANNEL_ID = "automatrix_automations"
+
+    private var emergencyPlayer: MediaPlayer? = null
+    private var previousAlarmVolume = -1
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     fun executeAction(context: Context, action: AutomationAction): ActionResult {
         return try {
@@ -209,6 +218,23 @@ object ActionExecutor {
                     }
                 }
 
+                ActionType.EMERGENCY_ALARM -> {
+                    val durationSec = config.optInt("durationSec", 30).coerceIn(5, 300)
+                    playEmergencyAlarm(context, durationSec)
+                    ActionResult.Success("Emergency alarm ringing for $durationSec s (alarm stream at max volume)")
+                }
+
+                ActionType.SPEAK_TEXT -> {
+                    val text = config.optString("text", "Automation triggered").trim()
+                    val alarmStream = config.optBoolean("alarmStream", false)
+                    val spoken = TtsSpeaker.speak(context, text, alarmStream)
+                    if (spoken) {
+                        ActionResult.Success("Speaking: \"$text\"")
+                    } else {
+                        ActionResult.Success("Voice engine starting — \"$text\" will play shortly")
+                    }
+                }
+
                 ActionType.ACCESSIBILITY_NAV -> {
                     val navAction = config.optString("action", "HOME").uppercase()
                     val service = FlowAccessibilityService.instance
@@ -237,6 +263,80 @@ object ActionExecutor {
             }
         } catch (e: Exception) {
             ActionResult.Failure("Execution error: ${e.localizedMessage ?: "Unknown exception"}")
+        }
+    }
+
+    /**
+     * Rings the alarm tone on the ALARM stream at maximum volume. The alarm
+     * stream is unaffected by the ringer being silent, so this works even
+     * when the phone is muted. Volume is restored afterwards.
+     */
+    private fun playEmergencyAlarm(context: Context, durationSec: Int) {
+        stopEmergencyAlarm()
+
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+        if (audioManager != null) {
+            previousAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+            audioManager.setStreamVolume(
+                AudioManager.STREAM_ALARM,
+                audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM),
+                0
+            )
+        }
+
+        val ringtoneUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
+            ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
+        val player = MediaPlayer()
+        emergencyPlayer = player
+        try {
+            player.setDataSource(context, ringtoneUri)
+            player.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+            player.isLooping = true
+            player.prepare()
+            player.start()
+        } catch (e: Exception) {
+            try {
+                player.release()
+            } catch (_: Exception) {
+            }
+            emergencyPlayer = null
+            restoreAlarmVolume(audioManager)
+            return
+        }
+
+        mainHandler.postDelayed({
+            stopEmergencyAlarm()
+        }, durationSec * 1000L)
+    }
+
+    private fun stopEmergencyAlarm() {
+        val player = emergencyPlayer ?: return
+        emergencyPlayer = null
+        try {
+            player.stop()
+        } catch (_: Exception) {
+        }
+        try {
+            player.release()
+        } catch (_: Exception) {
+        }
+        mainHandler.removeCallbacksAndMessages(null)
+    }
+
+    private fun restoreAlarmVolume(audioManager: AudioManager?) {
+        if (audioManager != null && previousAlarmVolume >= 0) {
+            try {
+                audioManager.setStreamVolume(AudioManager.STREAM_ALARM, previousAlarmVolume, 0)
+            } catch (_: Exception) {
+            }
+            previousAlarmVolume = -1
         }
     }
 

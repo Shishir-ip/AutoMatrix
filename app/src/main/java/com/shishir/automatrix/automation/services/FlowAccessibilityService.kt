@@ -16,15 +16,21 @@ class FlowAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
 
-        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            val pkgName = event.packageName?.toString() ?: return
-            val app = applicationContext as? AutoMatrixApp ?: return
-            app.automationEngine.triggerAutomations(
-                ConditionEvaluator.TriggerContext(
-                    triggerType = ConditionType.APP_OPENED,
-                    extraData = mapOf("packageName" to pkgName)
+        // Never let a malformed event crash the service: some manufacturers
+        // disable accessibility entirely when the service crashes on boot.
+        try {
+            if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                val pkgName = event.packageName?.toString() ?: return
+                val app = applicationContext as? AutoMatrixApp ?: return
+                app.automationEngine.triggerAutomations(
+                    ConditionEvaluator.TriggerContext(
+                        triggerType = ConditionType.APP_OPENED,
+                        extraData = mapOf("packageName" to pkgName)
+                    )
                 )
-            )
+            }
+        } catch (_: Exception) {
+            // Swallow: keeping the service alive is more important than one event
         }
     }
 

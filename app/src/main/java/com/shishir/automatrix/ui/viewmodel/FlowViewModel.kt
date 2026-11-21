@@ -71,6 +71,9 @@ class FlowViewModel(application: Application) : AndroidViewModel(application) {
     val isCalendarTriggerEnabled: StateFlow<Boolean> = prefRepo.isCalendarTriggerEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val flipTargetModeId: StateFlow<String> = prefRepo.flipTargetModeId
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "mode_sleep")
+
     /** null = still loading from disk; false = onboarding pending; true = seen */
     val isOnboardingDone: StateFlow<Boolean?> = prefRepo.isOnboardingDone
         .map<Boolean, Boolean?> { it }
@@ -249,6 +252,12 @@ class FlowViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             prefRepo.setFlipToShhhEnabled(enabled)
             _userFeedback.emit("Flip-to-Shhh ${if (enabled) "enabled" else "disabled"}")
+        }
+    }
+
+    fun setFlipTargetModeId(modeId: String) {
+        viewModelScope.launch {
+            prefRepo.setFlipTargetModeId(modeId)
         }
     }
 

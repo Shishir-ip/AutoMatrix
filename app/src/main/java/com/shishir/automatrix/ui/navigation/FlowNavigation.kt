@@ -300,6 +300,7 @@ fun FlowAppContent(
                 val isCalendarTriggerEnabled by viewModel.isCalendarTriggerEnabled.collectAsState()
                 val phoneOrientation by viewModel.phoneOrientation.collectAsState()
                 val modes by viewModel.modes.collectAsState()
+                val flipTargetModeId by viewModel.flipTargetModeId.collectAsState()
 
                 SettingsScreen(
                     themeMode = themeMode,
@@ -309,9 +310,11 @@ fun FlowAppContent(
                     isCalendarTriggerEnabled = isCalendarTriggerEnabled,
                     phoneOrientation = phoneOrientation,
                     modes = modes,
+                    flipTargetModeId = flipTargetModeId,
                     onThemeModeChange = { viewModel.setThemeMode(it) },
                     onDeveloperModeChange = { viewModel.setDeveloperMode(it) },
                     onFlipToShhhChange = { viewModel.setFlipToShhhEnabled(it) },
+                    onFlipTargetModeChange = { viewModel.setFlipTargetModeId(it) },
                     onShakeTriggerChange = { viewModel.setShakeTriggerEnabled(it) },
                     onCalendarTriggerChange = { viewModel.setCalendarTriggerEnabled(it) },
                     onSimulateNfcTap = { viewModel.simulateNfcTap(it) },

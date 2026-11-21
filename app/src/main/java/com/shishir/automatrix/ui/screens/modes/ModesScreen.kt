@@ -201,7 +201,7 @@ private fun ModeCardItem(
             Spacer(modifier = Modifier.height(2.dp))
 
             Text(
-                text = "${mode.actions.size} actions · View details",
+                text = "${mode.actions.size} ${if (mode.actions.size == 1) "action" else "actions"} · View details",
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                 color = if (isSelected) onAccent.copy(alpha = 0.7f) else glassColors.textSecondary,
                 maxLines = 1

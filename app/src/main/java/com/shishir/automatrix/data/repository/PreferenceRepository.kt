@@ -18,6 +18,12 @@ class PreferenceRepository(private val context: Context) {
     private val keyShakeTrigger = booleanPreferencesKey("shake_trigger_enabled")
     private val keyCalendarTrigger = booleanPreferencesKey("calendar_trigger_enabled")
     private val keyOnboardingDone = booleanPreferencesKey("onboarding_done")
+    private val keyFlipTargetMode = stringPreferencesKey("flip_target_mode_id")
+
+    /** Mode activated by the Flip-to-Shhh gesture; empty string = routines only. */
+    val flipTargetModeId: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[keyFlipTargetMode] ?: "mode_sleep"
+    }
 
     val themeMode: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[keyThemeMode] ?: "system" // "system", "dark", "light"
@@ -73,5 +79,9 @@ class PreferenceRepository(private val context: Context) {
 
     suspend fun setOnboardingDone(done: Boolean) {
         context.dataStore.edit { it[keyOnboardingDone] = done }
+    }
+
+    suspend fun setFlipTargetModeId(modeId: String) {
+        context.dataStore.edit { it[keyFlipTargetMode] = modeId }
     }
 }

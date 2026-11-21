@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shishir.automatrix.permissions.PermissionManager
+import com.shishir.automatrix.ui.components.sheetScrollWithoutDismiss
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
 
 private data class OemGuide(
@@ -117,6 +118,7 @@ fun OemBatteryGuideSheet(onDismiss: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .sheetScrollWithoutDismiss()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 32.dp)

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Code
@@ -81,6 +82,7 @@ import kotlinx.coroutines.launch
 
 private const val DEVELOPER_GITHUB_URL = "https://github.com/Shishir-ip"
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     themeMode: String,
@@ -90,9 +92,11 @@ fun SettingsScreen(
     isCalendarTriggerEnabled: Boolean,
     phoneOrientation: PhoneOrientation,
     modes: List<Mode>,
+    flipTargetModeId: String,
     onThemeModeChange: (String) -> Unit,
     onDeveloperModeChange: (Boolean) -> Unit,
     onFlipToShhhChange: (Boolean) -> Unit,
+    onFlipTargetModeChange: (String) -> Unit,
     onShakeTriggerChange: (Boolean) -> Unit,
     onCalendarTriggerChange: (Boolean) -> Unit,
     onSimulateNfcTap: (String) -> Unit,
@@ -112,6 +116,7 @@ fun SettingsScreen(
     var showImportDialog by remember { mutableStateOf(false) }
     var showNfcDialog by remember { mutableStateOf(false) }
     var showOemGuide by remember { mutableStateOf(false) }
+    var showFlipTargetPicker by remember { mutableStateOf(false) }
     var exportedJsonText by remember { mutableStateOf("") }
     var importInputText by remember { mutableStateOf("") }
     var isCheckingUpdate by remember { mutableStateOf(false) }
@@ -211,6 +216,19 @@ fun SettingsScreen(
                         }
                     )
                     if (isFlipToShhhEnabled) {
+                        val targetName = modes.firstOrNull { it.id == flipTargetModeId }?.name
+                        FlowRowItem(
+                            title = "Opens on flip",
+                            subtitle = when {
+                                flipTargetModeId.isBlank() -> "Routines only — no mode is activated"
+                                targetName != null -> targetName
+                                else -> "Unknown mode (pick a new one)"
+                            },
+                            icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            iconTint = glassColors.textMuted,
+                            iconBackgroundColor = Color.Transparent,
+                            onClick = { showFlipTargetPicker = true }
+                        )
                         Text(
                             text = "Live sensor: ${phoneOrientation.label}",
                             style = MaterialTheme.typography.bodySmall,
@@ -494,6 +512,68 @@ fun SettingsScreen(
 
     if (showOemGuide) {
         OemBatteryGuideSheet(onDismiss = { showOemGuide = false })
+    }
+
+    if (showFlipTargetPicker) {
+        val sheetState = androidx.compose.material3.rememberModalBottomSheetState(
+            skipPartiallyExpanded = true
+        )
+        androidx.compose.material3.ModalBottomSheet(
+            onDismissRequest = { showFlipTargetPicker = false },
+            sheetState = sheetState,
+            containerColor = glassColors.glassSurface,
+            tonalElevation = 0.dp,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 24.dp)
+            ) {
+                Text(
+                    text = "What does flipping face-down do?",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = glassColors.textPrimary
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Choose the mode that starts, or trigger your routines only.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = glassColors.textSecondary
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                FlowRowItem(
+                    title = "Routines only",
+                    subtitle = "No mode is activated — flip just fires the Flip-to-Shhh condition",
+                    onClick = {
+                        onFlipTargetModeChange("")
+                        showFlipTargetPicker = false
+                    },
+                    trailing = {
+                        if (flipTargetModeId.isBlank()) {
+                            Icon(Icons.Default.Check, contentDescription = null, tint = glassColors.accent)
+                        }
+                    }
+                )
+                modes.forEach { mode ->
+                    FlowRowItem(
+                        title = mode.name,
+                        subtitle = "${mode.actions.size} ${if (mode.actions.size == 1) "action" else "actions"}",
+                        onClick = {
+                            onFlipTargetModeChange(mode.id)
+                            showFlipTargetPicker = false
+                        },
+                        trailing = {
+                            if (flipTargetModeId == mode.id) {
+                                Icon(Icons.Default.Check, contentDescription = null, tint = glassColors.accent)
+                            }
+                        }
+                    )
+                }
+            }
+        }
     }
 
     when (val result = updateResult) {

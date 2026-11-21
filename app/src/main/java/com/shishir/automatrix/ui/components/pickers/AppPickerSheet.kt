@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import com.shishir.automatrix.ui.components.FlowGlassCard
+import com.shishir.automatrix.ui.components.sheetScrollWithoutDismiss
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -176,7 +177,8 @@ fun AppPickerSheet(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(420.dp),
+                        .height(420.dp)
+                        .sheetScrollWithoutDismiss(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     // Quick option: Any App

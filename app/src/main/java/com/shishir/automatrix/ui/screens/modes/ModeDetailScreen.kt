@@ -256,7 +256,7 @@ fun ModeDetailScreen(
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "${mode.actions.size} profile settings",
+                                text = "${mode.actions.size} ${if (mode.actions.size == 1) "profile setting" else "profile settings"}",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = accentColor

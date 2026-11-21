@@ -37,6 +37,13 @@ import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.AirplanemodeActive
+import androidx.compose.material.icons.filled.AirplanemodeInactive
+import androidx.compose.material.icons.filled.BatterySaver
+import androidx.compose.material.icons.filled.DoNotDisturbOff
+import androidx.compose.material.icons.filled.DoNotDisturbOn
+import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.VolumeUp
@@ -89,6 +96,13 @@ object IconHelper {
             "Event" -> Icons.Default.CalendarMonth
             "PhoneLocked" -> Icons.Default.PhoneLocked
             "ScreenRotation" -> Icons.Default.ScreenRotation
+            "BatterySaver" -> Icons.Default.BatterySaver
+            "AirplanemodeActive" -> Icons.Default.AirplanemodeActive
+            "AirplanemodeInactive" -> Icons.Default.AirplanemodeInactive
+            "DoNotDisturbOn" -> Icons.Default.DoNotDisturbOn
+            "DoNotDisturbOff" -> Icons.Default.DoNotDisturbOff
+            "Alarm" -> Icons.Default.Alarm
+            "RecordVoiceOver" -> Icons.Default.RecordVoiceOver
             else -> Icons.Default.AutoAwesome
         }
     }

@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import com.shishir.automatrix.domain.models.ActionType
 import com.shishir.automatrix.domain.models.AutomationAction
 import com.shishir.automatrix.ui.components.FlowGlassCard
+import com.shishir.automatrix.ui.components.sheetScrollWithoutDismiss
 import com.shishir.automatrix.ui.components.FlowGradientButton
 import com.shishir.automatrix.ui.components.FlowSlider
 import com.shishir.automatrix.ui.components.FlowSwitch
@@ -116,6 +117,13 @@ fun ActionConfigSheet(
     // Accessibility nav
     var accessibilityAction by remember { mutableStateOf(parsedConfig.optString("action", "HOME")) }
 
+    // Emergency alarm
+    var alarmDurationSec by remember { mutableFloatStateOf(parsedConfig.optInt("durationSec", 30).toFloat()) }
+
+    // Speak text
+    var speakText by remember { mutableStateOf(parsedConfig.optString("text", "Automation triggered")) }
+    var speakAlarmStream by remember { mutableStateOf(parsedConfig.optBoolean("alarmStream", false)) }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -125,6 +133,7 @@ fun ActionConfigSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .sheetScrollWithoutDismiss()
                 .padding(horizontal = 20.dp, vertical = 8.dp)
                 .verticalScroll(rememberScrollState())
         ) {
@@ -511,6 +520,73 @@ fun ActionConfigSheet(
                     }
                 }
 
+                ActionType.EMERGENCY_ALARM -> {
+                    Text(
+                        text = "Ring Duration",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                        color = glassColors.textPrimary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Plays the alarm tone on the alarm stream at maximum volume — audible even when the phone is silent",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = glassColors.textSecondary
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "${alarmDurationSec.toInt()} seconds",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = glassColors.textPrimary
+                    )
+                    FlowSlider(
+                        value = alarmDurationSec,
+                        onValueChange = { alarmDurationSec = it },
+                        valueRange = 5f..120f,
+                        steps = 22,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                ActionType.SPEAK_TEXT -> {
+                    Text(
+                        text = "Phrase to Speak",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                        color = glassColors.textPrimary
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = speakText,
+                        onValueChange = { speakText = it },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = LocalFlowGlassColors.current.accent,
+                            unfocusedBorderColor = glassColors.glassBorder
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Play even when silent",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = glassColors.textPrimary
+                            )
+                            Text(
+                                text = "Routes the voice to the alarm stream",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = glassColors.textSecondary
+                            )
+                        }
+                        FlowSwitch(checked = speakAlarmStream, onCheckedChange = { speakAlarmStream = it })
+                    }
+                }
+
                 ActionType.TOGGLE_FLASHLIGHT -> {
                     Text(
                         text = "Flashlight Mode",
@@ -673,6 +749,15 @@ fun ActionConfigSheet(
                         ActionType.ACCESSIBILITY_NAV -> {
                             newConfig.put("action", accessibilityAction)
                             newSummary = "Press $accessibilityAction"
+                        }
+                        ActionType.EMERGENCY_ALARM -> {
+                            newConfig.put("durationSec", alarmDurationSec.toInt())
+                            newSummary = "Loud alarm · ${alarmDurationSec.toInt()} s"
+                        }
+                        ActionType.SPEAK_TEXT -> {
+                            newConfig.put("text", speakText)
+                            newConfig.put("alarmStream", speakAlarmStream)
+                            newSummary = if (speakAlarmStream) "Speak (always audible): \"$speakText\"" else "Speak: \"$speakText\""
                         }
                     }
 

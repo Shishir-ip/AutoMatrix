@@ -125,7 +125,7 @@ fun RoutinesScreen(
                         )
                         Spacer(modifier = Modifier.height(3.dp))
                         Text(
-                            text = "${routines.size} automations",
+                            text = "${routines.size} ${if (routines.size == 1) "automation" else "automations"}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = glassColors.textSecondary
                         )

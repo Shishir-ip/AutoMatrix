@@ -44,16 +44,24 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 - Automatic revert: settings restore when the mode ends
 
 **Routines (Automation)**
-- Triggers: time schedules, battery level, charging state, Wi-Fi networks, Bluetooth devices, headphone plug, screen on/off, boot completed, app launch (accessibility), NFC tags, calendar events
+- Triggers: time schedules, battery level, charging state, battery saver on/off, airplane mode on/off, Do Not Disturb on/off, Wi-Fi networks, Bluetooth devices, headphone plug, screen on/off, boot completed, app launch (accessibility), NFC tags, calendar events
 - Conditions: combine triggers with All (AND) / Any (OR) logic and priorities
-- Actions: ringer mode, DND, media/ring volume, brightness, Wi-Fi, Bluetooth, launch app, notifications, and more — with restore-on-exit support
+- Actions: ringer mode, DND, media/ring volume, brightness, Wi-Fi, Bluetooth, launch app, notifications, **Emergency Alarm** (loud alarm on the alarm stream — audible even when the phone is silent), **Speak Text** (text-to-speech voice alerts), flashlight, vibration, open URL, and more — with restore-on-exit support
 - Ready-made template gallery: Sleep Mode, Morning Routine, Battery Saver, Commute, Security Guard and others
 
 **Triggers without opening the app**
-- Flip to Shhh — place the phone face down to silence and focus
+- Flip to Shhh — place the phone face down; **you choose which mode it starts** (any of your modes, or routines-only)
 - Shake gesture to run your top routine
 - Notification triggers — react to notifications from any app, matching the title or text (chat apps like WhatsApp supported, including message updates)
 - NFC stickers (write them right inside the app)
+
+**Reliability built in**
+- A permission watchdog notifies you when an enabled automation can't run — e.g. if accessibility gets switched off after a phone restart
+- Nothing is enabled by default: freshly installed routines are pre-built examples, all switched off until you turn them on
+- Guided **battery & startup walkthrough** for Xiaomi, Samsung, Huawei, OnePlus, Vivo and stock Android
+- In-app update check so sideloaded installs never go stale
+- Optional 3-step onboarding that explains permissions up front
+- Sheets and pickers scroll smoothly and only close from their handle or close button
 
 **Privacy & Design**
 - Zero analytics, zero trackers, fully offline automation
@@ -62,16 +70,11 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 - System / Light / Dark theme modes
 - JSON backup export & import — your data is yours
 
-**Reliability**
-- Guided **battery & startup walkthrough** for Xiaomi, Samsung, Huawei, OnePlus, Vivo and stock Android
-- In-app update check so sideloaded installs never go stale
-- Optional 3-step onboarding that explains permissions up front
-
 ## Download
 
 Grab the latest signed APK from [**Releases**](https://github.com/Shishir-ip/AutoMatrix/releases/latest):
 
-1. Download `AutoMatrix-v1.1.0.apk`
+1. Download `AutoMatrix-v1.2.0.apk`
 2. Open it and allow "Install unknown apps" for your browser/file manager
 3. Done — the app requests permissions progressively as you use features
 

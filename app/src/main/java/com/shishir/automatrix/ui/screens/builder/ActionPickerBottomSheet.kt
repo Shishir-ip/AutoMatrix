@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.shishir.automatrix.domain.models.ActionType
 import com.shishir.automatrix.domain.models.AutomationAction
 import com.shishir.automatrix.ui.components.FlowRowItem
+import com.shishir.automatrix.ui.components.sheetScrollWithoutDismiss
 import com.shishir.automatrix.ui.components.IconHelper
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
 import java.util.UUID
@@ -122,7 +123,8 @@ fun ActionPickerBottomSheet(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(420.dp),
+                    .height(420.dp)
+                    .sheetScrollWithoutDismiss(),
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
                 items(filtered, key = { it.name }) { item ->
@@ -239,6 +241,22 @@ private fun createDefaultAction(type: ActionType): AutomationAction {
             title = type.displayName,
             summary = "Go Home",
             configJson = """{"action":"HOME"}"""
+        )
+        ActionType.EMERGENCY_ALARM -> AutomationAction(
+            id = id,
+            routineId = "",
+            type = type,
+            title = type.displayName,
+            summary = "Loud alarm · 30 s",
+            configJson = """{"durationSec":30}"""
+        )
+        ActionType.SPEAK_TEXT -> AutomationAction(
+            id = id,
+            routineId = "",
+            type = type,
+            title = type.displayName,
+            summary = "Automation triggered",
+            configJson = """{"text":"Automation triggered","alarmStream":false}"""
         )
     }
 }

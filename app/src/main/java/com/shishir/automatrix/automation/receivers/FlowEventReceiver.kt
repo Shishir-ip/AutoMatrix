@@ -70,6 +70,9 @@ class FlowEventReceiver : BroadcastReceiver() {
                     )
                 )
                 app.flowScheduler.scheduleNextEvaluation()
+                // Some manufacturers disable accessibility on reboot — warn the
+                // user right away if an enabled automation depends on it.
+                com.shishir.automatrix.permissions.PermissionWatchdog.checkAfterBoot(context, app.repository)
             }
             WifiManager.NETWORK_STATE_CHANGED_ACTION -> {
                 engine.triggerAutomations(
@@ -87,6 +90,25 @@ class FlowEventReceiver : BroadcastReceiver() {
                         )
                     )
                 }
+            }
+            "android.os.action.POWER_SAVE_MODE_CHANGED" -> {
+                val powerManager = context.getSystemService(Context.POWER_SERVICE) as? android.os.PowerManager
+                val saverOn = powerManager?.isPowerSaveMode ?: false
+                engine.triggerAutomations(
+                    ConditionEvaluator.TriggerContext(
+                        triggerType = if (saverOn) ConditionType.BATTERY_SAVER_ON else ConditionType.BATTERY_SAVER_OFF,
+                        extraData = mapOf("battery_saver" to saverOn)
+                    )
+                )
+            }
+            Intent.ACTION_AIRPLANE_MODE_CHANGED -> {
+                val airplaneOn = intent.getBooleanExtra("state", false)
+                engine.triggerAutomations(
+                    ConditionEvaluator.TriggerContext(
+                        triggerType = if (airplaneOn) ConditionType.AIRPLANE_MODE_ON else ConditionType.AIRPLANE_MODE_OFF,
+                        extraData = mapOf("airplane_mode" to airplaneOn)
+                    )
+                )
             }
         }
     }

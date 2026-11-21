@@ -46,11 +46,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
@@ -68,6 +73,27 @@ import com.shishir.automatrix.ui.theme.FlowGlassColors
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
 import com.shishir.automatrix.ui.theme.StatusError
 import com.shishir.automatrix.ui.theme.StatusSuccess
+
+/**
+ * Prevents a bottom sheet from translating/dismissing while its inner list is
+ * scrolled. Any leftover downward drag (i.e. the list is already at the top)
+ * is consumed here, so the sheet only closes via the top handle area or the
+ * close button — never mid-scroll.
+ */
+fun Modifier.sheetScrollWithoutDismiss(): Modifier = composed {
+    val connection = remember {
+        object : NestedScrollConnection {
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                return if (available.y > 0f) Offset(0f, available.y) else Offset.Zero
+            }
+        }
+    }
+    this.nestedScroll(connection)
+}
 
 /**
  * iOS-style grouped card surface: solid fill, hairline separator, tactile press.

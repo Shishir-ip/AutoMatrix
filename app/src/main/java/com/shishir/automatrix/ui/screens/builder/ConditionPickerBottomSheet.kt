@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.shishir.automatrix.domain.models.AutomationCondition
 import com.shishir.automatrix.domain.models.ConditionType
 import com.shishir.automatrix.ui.components.FlowRowItem
+import com.shishir.automatrix.ui.components.sheetScrollWithoutDismiss
 import com.shishir.automatrix.ui.components.IconHelper
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
 import java.util.UUID
@@ -123,7 +124,8 @@ fun ConditionPickerBottomSheet(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(420.dp),
+                    .height(420.dp)
+                    .sheetScrollWithoutDismiss(),
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
                 items(filtered, key = { it.name }) { item ->
@@ -343,6 +345,54 @@ private fun createDefaultCondition(type: ConditionType): AutomationCondition {
             type = type,
             title = type.displayName,
             summary = "Manual trigger only",
+            configJson = """{}"""
+        )
+        ConditionType.BATTERY_SAVER_ON -> AutomationCondition(
+            id = id,
+            routineId = "",
+            type = type,
+            title = type.displayName,
+            summary = "Battery Saver turned on",
+            configJson = """{}"""
+        )
+        ConditionType.BATTERY_SAVER_OFF -> AutomationCondition(
+            id = id,
+            routineId = "",
+            type = type,
+            title = type.displayName,
+            summary = "Battery Saver turned off",
+            configJson = """{}"""
+        )
+        ConditionType.AIRPLANE_MODE_ON -> AutomationCondition(
+            id = id,
+            routineId = "",
+            type = type,
+            title = type.displayName,
+            summary = "Airplane mode turned on",
+            configJson = """{}"""
+        )
+        ConditionType.AIRPLANE_MODE_OFF -> AutomationCondition(
+            id = id,
+            routineId = "",
+            type = type,
+            title = type.displayName,
+            summary = "Airplane mode turned off",
+            configJson = """{}"""
+        )
+        ConditionType.DND_ON -> AutomationCondition(
+            id = id,
+            routineId = "",
+            type = type,
+            title = type.displayName,
+            summary = "Do Not Disturb turned on",
+            configJson = """{}"""
+        )
+        ConditionType.DND_OFF -> AutomationCondition(
+            id = id,
+            routineId = "",
+            type = type,
+            title = type.displayName,
+            summary = "Do Not Disturb turned off",
             configJson = """{}"""
         )
     }

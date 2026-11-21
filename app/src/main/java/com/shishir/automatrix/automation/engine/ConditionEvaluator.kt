@@ -394,6 +394,38 @@ object ConditionEvaluator {
                 val isShake = triggerContext.triggerType == ConditionType.SHAKE_GESTURE
                 return Pair(isShake, if (isShake) "Shake Gesture Detected" else "No Shake Gesture")
             }
+
+            // Edge-triggered system states: the event layer (broadcasts /
+            // listeners) fires them only on transitions, so they match exactly.
+            ConditionType.BATTERY_SAVER_ON -> {
+                val matched = triggerContext.triggerType == ConditionType.BATTERY_SAVER_ON
+                return Pair(matched, "Battery Saver Turned On")
+            }
+
+            ConditionType.BATTERY_SAVER_OFF -> {
+                val matched = triggerContext.triggerType == ConditionType.BATTERY_SAVER_OFF
+                return Pair(matched, "Battery Saver Turned Off")
+            }
+
+            ConditionType.AIRPLANE_MODE_ON -> {
+                val matched = triggerContext.triggerType == ConditionType.AIRPLANE_MODE_ON
+                return Pair(matched, "Airplane Mode Turned On")
+            }
+
+            ConditionType.AIRPLANE_MODE_OFF -> {
+                val matched = triggerContext.triggerType == ConditionType.AIRPLANE_MODE_OFF
+                return Pair(matched, "Airplane Mode Turned Off")
+            }
+
+            ConditionType.DND_ON -> {
+                val matched = triggerContext.triggerType == ConditionType.DND_ON
+                return Pair(matched, "Do Not Disturb Turned On")
+            }
+
+            ConditionType.DND_OFF -> {
+                val matched = triggerContext.triggerType == ConditionType.DND_OFF
+                return Pair(matched, "Do Not Disturb Turned Off")
+            }
         }
     }
 

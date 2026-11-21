@@ -58,17 +58,29 @@ class AutoMatrixApp : Application() {
         applicationScope.launch {
             kotlinx.coroutines.flow.combine(
                 preferenceRepository.isFlipToShhhEnabled,
-                preferenceRepository.isShakeTriggerEnabled
-            ) { flipEnabled, shakeEnabled ->
-                Pair(flipEnabled, shakeEnabled)
-            }.collect { (flipEnabled, shakeEnabled) ->
+                preferenceRepository.isShakeTriggerEnabled,
+                preferenceRepository.flipTargetModeId
+            ) { flipEnabled, shakeEnabled, flipTarget ->
+                Triple(flipEnabled, shakeEnabled, flipTarget)
+            }.collect { (flipEnabled, shakeEnabled, flipTarget) ->
                 gestureSensorManager.isFlipToShhhEnabled = flipEnabled
                 gestureSensorManager.isShakeEnabled = shakeEnabled
+                gestureSensorManager.flipTargetModeId = flipTarget
                 if (flipEnabled || shakeEnabled) {
                     gestureSensorManager.start()
                 } else {
                     gestureSensorManager.stop()
                 }
+            }
+        }
+
+        // Permission watchdog: warn the user when a permission an enabled
+        // automation depends on is missing (e.g. accessibility off after reboot)
+        applicationScope.launch {
+            repository.allRoutines.collect { routines ->
+                com.shishir.automatrix.permissions.PermissionWatchdog.checkAndNotify(
+                    this@AutoMatrixApp, routines
+                )
             }
         }
     }

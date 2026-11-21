@@ -1,6 +1,8 @@
 package com.shishir.automatrix.ui.screens.templates
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,6 +55,7 @@ import com.shishir.automatrix.domain.models.Routine
 import com.shishir.automatrix.domain.templates.RoutineTemplate
 import com.shishir.automatrix.domain.templates.TemplateCatalog
 import com.shishir.automatrix.ui.components.FlowGlassCard
+import com.shishir.automatrix.ui.components.sheetScrollWithoutDismiss
 import com.shishir.automatrix.ui.components.FlowGradientButton
 import com.shishir.automatrix.ui.components.IconHelper
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
@@ -329,6 +332,8 @@ fun TemplatesGalleryScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .sheetScrollWithoutDismiss()
+                    .verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp, vertical = 12.dp)
             ) {
                 Row(

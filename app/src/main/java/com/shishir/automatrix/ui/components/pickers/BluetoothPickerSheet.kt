@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.shishir.automatrix.ui.components.FlowGlassCard
 import com.shishir.automatrix.ui.components.FlowGradientButton
+import com.shishir.automatrix.ui.components.sheetScrollWithoutDismiss
 import com.shishir.automatrix.ui.theme.LocalFlowGlassColors
 
 data class PairedDeviceItem(
@@ -160,7 +161,8 @@ fun BluetoothPickerSheet(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(140.dp),
+                        .height(140.dp)
+                        .sheetScrollWithoutDismiss(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(
