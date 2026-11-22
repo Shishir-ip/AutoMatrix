@@ -141,8 +141,12 @@ object ConditionEvaluator {
                 val targetH = config.optInt("hour", 8)
                 val targetM = config.optInt("minute", 0)
                 val now = triggerContext.simulatedCalendar ?: Calendar.getInstance()
-                val isMatch = (now.get(Calendar.HOUR_OF_DAY) == targetH &&
-                        Math.abs(now.get(Calendar.MINUTE) - targetM) <= 1)
+                // The exact per-routine alarm IS the trigger — match directly so
+                // Doze delays or a missed sweep can never swallow it.
+                val firedForRoutine = triggerContext.extraData.containsKey("routine_id")
+                val isMatch = firedForRoutine ||
+                        (now.get(Calendar.HOUR_OF_DAY) == targetH &&
+                                Math.abs(now.get(Calendar.MINUTE) - targetM) <= 1)
                 val msg = "Specific time: %02d:%02d".format(targetH, targetM)
                 return Pair(isMatch, msg)
             }

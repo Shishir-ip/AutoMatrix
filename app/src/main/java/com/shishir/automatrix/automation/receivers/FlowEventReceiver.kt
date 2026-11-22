@@ -3,6 +3,9 @@ package com.shishir.automatrix.automation.receivers
 import android.bluetooth.BluetoothAdapter
 import android.content.BroadcastReceiver
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import android.content.Intent
 import android.net.wifi.WifiManager
 import com.shishir.automatrix.AutoMatrixApp
@@ -72,7 +75,15 @@ class FlowEventReceiver : BroadcastReceiver() {
                 app.flowScheduler.scheduleNextEvaluation()
                 // Some manufacturers disable accessibility on reboot — warn the
                 // user right away if an enabled automation depends on it.
-                com.shishir.automatrix.permissions.PermissionWatchdog.checkAfterBoot(context, app.repository)
+                val pendingResult = goAsync()
+                CoroutineScope(Dispatchers.Default).launch {
+                    try {
+                        com.shishir.automatrix.automation.scheduler.RoutineAlarmScheduler.rescheduleAll(context)
+                        com.shishir.automatrix.permissions.PermissionWatchdog.checkAfterBoot(context, app.repository)
+                    } finally {
+                        pendingResult.finish()
+                    }
+                }
             }
             WifiManager.NETWORK_STATE_CHANGED_ACTION -> {
                 engine.triggerAutomations(

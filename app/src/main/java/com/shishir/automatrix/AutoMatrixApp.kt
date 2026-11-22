@@ -90,6 +90,8 @@ class AutoMatrixApp : Application() {
                 } else {
                     flowScheduler.cancelScheduledEvaluation()
                 }
+                // Exact per-routine alarms for time-based triggers
+                com.shishir.automatrix.automation.scheduler.RoutineAlarmScheduler.rescheduleAll(this@AutoMatrixApp)
             }
         }
     }

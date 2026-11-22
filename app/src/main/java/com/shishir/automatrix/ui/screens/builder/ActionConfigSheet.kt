@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import android.content.Context
@@ -45,6 +46,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -139,6 +141,14 @@ fun ActionConfigSheet(
 
     // Battery saver
     var batterySaverOn by remember { mutableStateOf(parsedConfig.optBoolean("enable", true)) }
+
+    // Activate mode — the library comes straight from the app instance
+    val modesForAction = remember {
+        (context.applicationContext as? com.shishir.automatrix.AutoMatrixApp)
+            ?.repository?.allModes
+    }?.collectAsState(initial = emptyList())?.value ?: emptyList()
+    var selectedModeId by remember { mutableStateOf(parsedConfig.optString("modeId", "")) }
+    var selectedModeName by remember { mutableStateOf(parsedConfig.optString("modeName", "")) }
 
     // Wait delay
     var waitSeconds by remember { mutableFloatStateOf(parsedConfig.optInt("durationSec", 30).toFloat()) }
@@ -733,6 +743,76 @@ fun ActionConfigSheet(
                     }
                 }
 
+                ActionType.ACTIVATE_MODE -> {
+                    Text(
+                        text = "Mode to Activate",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                        color = glassColors.textPrimary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Starting this routine activates the chosen mode and applies all of its actions.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = glassColors.textSecondary
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    if (modesForAction.isEmpty()) {
+                        FlowGlassCard(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = "No modes yet — create one in the Modes tab first.",
+                                fontSize = 13.sp,
+                                color = glassColors.textMuted,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    } else {
+                        modesForAction.forEach { mode ->
+                            FlowGlassCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    selectedModeId = mode.id
+                                    selectedModeName = mode.name
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(14.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = IconHelper.getIconByName(mode.iconName),
+                                        contentDescription = null,
+                                        tint = glassColors.textPrimary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = mode.name,
+                                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                            color = glassColors.textPrimary
+                                        )
+                                        Text(
+                                            text = "" + mode.actions.size + " " + (if (mode.actions.size == 1) "action" else "actions"),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = glassColors.textSecondary
+                                        )
+                                    }
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = if (selectedModeId == mode.id) glassColors.accent else Color.Transparent,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                }
+
                 ActionType.WAIT -> {
                     Text(
                         text = "Wait Duration",
@@ -936,6 +1016,11 @@ fun ActionConfigSheet(
                         ActionType.SET_BATTERY_SAVER -> {
                             newConfig.put("enable", batterySaverOn)
                             newSummary = if (batterySaverOn) "Battery Saver ON" else "Battery Saver OFF"
+                        }
+                        ActionType.ACTIVATE_MODE -> {
+                            newConfig.put("modeId", selectedModeId)
+                            newConfig.put("modeName", selectedModeName)
+                            newSummary = if (selectedModeName.isNotBlank()) "Activate: $selectedModeName" else "Select a mode"
                         }
                         ActionType.WAIT -> {
                             newConfig.put("durationSec", waitSeconds.toInt())

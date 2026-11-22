@@ -1,5 +1,8 @@
 package com.shishir.automatrix.automation.engine
 
+import com.shishir.automatrix.automation.engine.FlowModeController
+import kotlinx.coroutines.flow.first
+
 import com.shishir.automatrix.domain.models.ActionType
 import android.content.Context
 import com.shishir.automatrix.data.repository.AutomationRepository
@@ -169,6 +172,30 @@ class AutomationEngine(
                 }
                 kotlinx.coroutines.delay(seconds * 1000L)
                 actionSummaries.add("- ${action.title}: Waited ${if (seconds >= 60) "${seconds / 60}m ${seconds % 60}s" else "${seconds}s"}")
+                continue
+            }
+            // Activate Mode needs suspend work (DB read + mode actions) —
+            // handled here in the engine's coroutine, not the executor.
+            if (action.type == ActionType.ACTIVATE_MODE) {
+                val modeId = try {
+                    JSONObject(action.configJson.ifEmpty { "{}" }).optString("modeId", "")
+                } catch (_: Exception) { "" }
+                if (modeId.isBlank()) {
+                    actionSummaries.add("✕ ${action.title}: No mode selected")
+                    continue
+                }
+                val modes = repository.allModes.first()
+                val target = modes.firstOrNull { it.id == modeId }
+                if (target == null) {
+                    actionSummaries.add("✕ ${action.title}: Mode no longer exists")
+                    continue
+                }
+                if (target.isActive) {
+                    actionSummaries.add("- ${action.title}: Mode is already active")
+                    continue
+                }
+                FlowModeController.activateMode(context, modeId)
+                actionSummaries.add("✓ ${action.title}: Mode activated")
                 continue
             }
             val result = ActionExecutor.executeAction(context, action)

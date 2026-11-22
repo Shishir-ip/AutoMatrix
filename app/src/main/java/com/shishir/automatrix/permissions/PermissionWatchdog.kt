@@ -1,5 +1,6 @@
 package com.shishir.automatrix.permissions
 
+import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -72,6 +73,11 @@ object PermissionWatchdog {
                         it.type == ConditionType.DND_OFF
             }
         }
+        val usesTimeTriggers = enabled.any { routine ->
+            routine.conditions.any {
+                it.type == ConditionType.TIME_SPECIFIC || it.type == ConditionType.TIME_RANGE
+            }
+        }
         val usesCalendar = enabled.any { it.conditions.any { c -> c.type == ConditionType.CALENDAR_EVENT } }
         val usesWriteSettings = enabled.any { it.actions.any { a -> a.type == ActionType.SET_BRIGHTNESS } }
         val usesDndControl = enabled.any { it.actions.any { a -> a.type == ActionType.SET_DND_MODE } }
@@ -85,6 +91,9 @@ object PermissionWatchdog {
             }
             if (usesCalendar && !isCalendarGranted(context)) {
                 add("Calendar permission is OFF — calendar triggers cannot read events")
+            }
+            if (usesTimeTriggers && !canScheduleExactAlarms(context)) {
+                add("Alarms & reminders permission is OFF — scheduled times may be missed. Allow it in system settings")
             }
             if (usesWriteSettings && !Settings.System.canWrite(context)) {
                 add("Modify System Settings is OFF — brightness actions cannot run")
@@ -166,6 +175,12 @@ object PermissionWatchdog {
         } catch (_: Exception) {
             true
         }
+    }
+
+    private fun canScheduleExactAlarms(context: Context): Boolean {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) return true
+        val am = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return true
+        return am.canScheduleExactAlarms()
     }
 
     private fun isCalendarGranted(context: Context): Boolean {

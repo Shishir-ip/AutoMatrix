@@ -279,6 +279,11 @@ object ActionExecutor {
                     ActionResult.Success("Wait handled by scheduler")
                 }
 
+                ActionType.ACTIVATE_MODE -> {
+                    // Handled by the engine's action loop (suspend context).
+                    ActionResult.Success("Mode activation handled by engine")
+                }
+
                 ActionType.ACCESSIBILITY_NAV -> {
                     val navAction = config.optString("action", "HOME").uppercase()
                     val service = FlowAccessibilityService.instance
