@@ -274,7 +274,8 @@ private fun createDefaultAction(type: ActionType): AutomationAction {
             type = type,
             title = type.displayName,
             summary = "Battery Saver ON",
-            configJson = """{"enable":true}"""
+            configJson = """{"enable":true}""",
+            restoreOnExit = true
         )
         ActionType.ACTIVATE_MODE -> AutomationAction(
             id = id,

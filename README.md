@@ -46,7 +46,7 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 
 **Routines (Automation)**
 - Triggers: time schedules with a visual clock picker, days of the week, battery level, charging state, battery saver on/off, airplane mode on/off, Do Not Disturb on/off, Wi-Fi networks, Bluetooth devices, headphone plug, screen on/off, boot completed, app launch (accessibility), NFC tags, calendar events
-- Conditions: combine triggers with All (AND) / Any (OR) logic and priorities — time triggers fire via **exact per-routine alarms**, so Specific Time and Time Window runs start on the dot instead of waiting for a periodic sweep
+- Conditions: combine triggers with All (AND) / Any (OR) logic and priorities — time triggers fire via **exact per-routine alarms** at the window start and end, so Battery Saver-style actions turn on at the start and automatically revert when the window closes (enable Restore When Routine Ends on the action)
 - Actions: ringer mode, DND, media/ring volume, brightness, Wi-Fi, Bluetooth, launch app, notifications, **Emergency Alarm** (loud alarm on the alarm stream — audible even when the phone is silent; pick any system alarm sound, and a notification with a Stop button appears while it rings), **Speak Text** (text-to-speech voice alerts), **Battery Saver on/off** (one-time ADB setup — see the in-app guide), **Wait/Delay** steps between actions, flashlight, vibration, open URL, and more — with restore-on-exit support
 - Ready-made template gallery: Sleep Mode, Morning Routine, Battery Saver, Commute, Security Guard and others
 
@@ -79,7 +79,7 @@ Think of it as the middle ground between iOS Focus Modes and full automation sui
 
 Grab the latest signed APK from [**Releases**](https://github.com/Shishir-ip/AutoMatrix/releases/latest):
 
-1. Download `AutoMatrix-v1.7.0.apk`
+1. Download `AutoMatrix-v1.8.0.apk`
 2. Open it and allow "Install unknown apps" for your browser/file manager
 3. Done — the app requests permissions progressively as you use features
 

@@ -22,6 +22,37 @@ class AlarmReceiver : BroadcastReceiver() {
         val routineId = intent?.getStringExtra(RoutineAlarmScheduler.EXTRA_ROUTINE_ID)
         val triggerName = intent?.getStringExtra(RoutineAlarmScheduler.EXTRA_TRIGGER)
 
+        if (routineId != null && triggerName == "TIME_RANGE_END") {
+            // The time window closed — revert actions flagged Restore-on-Exit
+            val pendingResult = goAsync()
+            CoroutineScope(Dispatchers.Default).launch {
+                try {
+                    val restored = engine.restoreRoutineState(routineId)
+                    val routine = runCatching {
+                        app.repository.getRoutineById(routineId)
+                    }.getOrNull()
+                    if (restored) {
+                        app.repository.recordExecutionLog(
+                            com.shishir.automatrix.domain.models.ExecutionLog(
+                                routineId = routineId,
+                                routineName = routine?.name ?: "Routine",
+                                triggerName = "Time Window Ended",
+                                timestamp = System.currentTimeMillis(),
+                                isSuccess = true,
+                                conditionsSummary = "Time window closed",
+                                actionsSummary = "Restored pre-routine device state",
+                                resultSummary = "Window ended — automatic revert applied"
+                            )
+                        )
+                    }
+                    RoutineAlarmScheduler.rescheduleAll(context)
+                } finally {
+                    pendingResult.finish()
+                }
+            }
+            return
+        }
+
         if (routineId != null && triggerName != null) {
             val triggerType = try {
                 ConditionType.valueOf(triggerName)
@@ -50,15 +81,8 @@ class AlarmReceiver : BroadcastReceiver() {
             )
         }
 
-        // 3. Re-arm: roll routine alarms to their next occurrence + next sweep
-        val pendingResult = goAsync()
-        CoroutineScope(Dispatchers.Default).launch {
-            try {
-                RoutineAlarmScheduler.rescheduleAll(context)
-            } finally {
-                pendingResult.finish()
-            }
-        }
+        // 3. Re-arm the periodic sweep (routine alarms re-arm inside the
+        // TIME_RANGE_END branch above; the sweep path only needs the sweep)
         app.flowScheduler.scheduleNextEvaluation()
     }
 }

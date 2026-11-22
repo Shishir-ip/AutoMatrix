@@ -113,6 +113,18 @@ object RoutineAlarmScheduler {
                                     scheduleExact(context, key, routine.id, "TIME_RANGE", triggerAt)
                                     newKeys.add(key)
                                 }
+
+                                // Restore alarm at window end — only when the
+                                // routine asked for its state to be reverted
+                                if (routine.actions.any { it.restoreOnExit }) {
+                                    val endAt = nextOccurrence(
+                                        config.optInt("endHour", 23),
+                                        config.optInt("endMinute", 59)
+                                    )
+                                    val endKey = "${routine.id}|TIME_RANGE_END|$endAt"
+                                    scheduleExact(context, endKey, routine.id, "TIME_RANGE_END", endAt)
+                                    newKeys.add(endKey)
+                                }
                             }
                         }
                         else -> Unit

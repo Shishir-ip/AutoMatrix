@@ -1,5 +1,7 @@
 package com.shishir.automatrix.automation.engine
 
+import android.content.SharedPreferences
+
 import android.content.Context
 import android.hardware.camera2.CameraManager
 import android.media.AudioManager
@@ -16,11 +18,46 @@ data class RoutineStateSnapshot(
     val originalMediaVolume: Int? = null,
     val originalRingerMode: Int? = null,
     val originalBrightness: Int? = null,
-    val originalFlashlight: Boolean? = null
+    val originalFlashlight: Boolean? = null,
+    val originalBatterySaver: Boolean? = null
 )
 
 object StateRestorationManager {
-    private val activeSnapshots = ConcurrentHashMap<String, RoutineStateSnapshot>()
+    // Snapshots persist in SharedPreferences so a restore still works after
+    // a reboot or an OEM battery kill in the middle of a time window.
+    private const val PREFS = "automatrix_routine_snapshots"
+
+    private fun prefs(context: Context) =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+    private fun snapshotToJson(snapshot: RoutineStateSnapshot): String {
+        val obj = JSONObject()
+        obj.put("routineId", snapshot.routineId)
+        obj.put("capturedAt", snapshot.capturedAt)
+        snapshot.originalMediaVolume?.let { obj.put("mediaVolume", it) }
+        snapshot.originalRingerMode?.let { obj.put("ringerMode", it) }
+        snapshot.originalBrightness?.let { obj.put("brightness", it) }
+        snapshot.originalFlashlight?.let { obj.put("flashlight", it) }
+        snapshot.originalBatterySaver?.let { obj.put("batterySaver", it) }
+        return obj.toString()
+    }
+
+    private fun snapshotFromJson(json: String): RoutineStateSnapshot? {
+        return try {
+            val obj = JSONObject(json)
+            RoutineStateSnapshot(
+                routineId = obj.optString("routineId"),
+                capturedAt = obj.optLong("capturedAt", System.currentTimeMillis()),
+                originalMediaVolume = if (obj.has("mediaVolume")) obj.getInt("mediaVolume") else null,
+                originalRingerMode = if (obj.has("ringerMode")) obj.getInt("ringerMode") else null,
+                originalBrightness = if (obj.has("brightness")) obj.getInt("brightness") else null,
+                originalFlashlight = if (obj.has("flashlight")) obj.getBoolean("flashlight") else null,
+                originalBatterySaver = if (obj.has("batterySaver")) obj.getBoolean("batterySaver") else null
+            )
+        } catch (_: Exception) {
+            null
+        }
+    }
 
     fun captureStateBeforeExecution(
         context: Context,
@@ -30,11 +67,16 @@ object StateRestorationManager {
         val reversibleActions = actions.filter { it.restoreOnExit }
         if (reversibleActions.isEmpty()) return
 
+        // Keep the ORIGINAL pre-window capture; later runs inside the same
+        // window (sweeps) must not overwrite it with the already-changed state.
+        if (prefs(context).contains(routineId)) return
+
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
         var mediaVolume: Int? = null
         var ringerMode: Int? = null
         var brightness: Int? = null
         var flashlight: Boolean? = null
+        var batterySaver: Boolean? = null
 
         for (action in reversibleActions) {
             when (action.type) {
@@ -60,28 +102,35 @@ object StateRestorationManager {
                 ActionType.TOGGLE_FLASHLIGHT -> {
                     flashlight = false // Default assumption prior to turning on
                 }
+                ActionType.SET_BATTERY_SAVER -> {
+                    if (batterySaver == null) {
+                        batterySaver = try {
+                            Settings.Global.getInt(context.contentResolver, "low_power", 0) == 1
+                        } catch (_: Exception) {
+                            false
+                        }
+                    }
+                }
                 else -> Unit
             }
         }
 
-        // Only store if we captured at least one restorable parameter and don't already have one
-        if (!activeSnapshots.containsKey(routineId)) {
-            activeSnapshots[routineId] = RoutineStateSnapshot(
-                routineId = routineId,
-                originalMediaVolume = mediaVolume,
-                originalRingerMode = ringerMode,
-                originalBrightness = brightness,
-                originalFlashlight = flashlight
-            )
-        }
+        val snapshot = RoutineStateSnapshot(
+            routineId = routineId,
+            originalMediaVolume = mediaVolume,
+            originalRingerMode = ringerMode,
+            originalBrightness = brightness,
+            originalFlashlight = flashlight,
+            originalBatterySaver = batterySaver
+        )
+
+        prefs(context).edit().putString(routineId, snapshotToJson(snapshot)).apply()
     }
 
-    fun hasSnapshot(routineId: String): Boolean = activeSnapshots.containsKey(routineId)
-
-    fun getSnapshot(routineId: String): RoutineStateSnapshot? = activeSnapshots[routineId]
-
     fun restoreState(context: Context, routineId: String): Boolean {
-        val snapshot = activeSnapshots.remove(routineId) ?: return false
+        val json = prefs(context).getString(routineId, null) ?: return false
+        prefs(context).edit().remove(routineId).apply()
+        val snapshot = snapshotFromJson(json) ?: return false
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
 
         // 1. Restore Media Volume
@@ -124,10 +173,18 @@ object StateRestorationManager {
             } catch (_: Exception) {}
         }
 
+        // 5. Restore Battery Saver (elevated setting — same grant as the action)
+        snapshot.originalBatterySaver?.let { saverOn ->
+            try {
+                Settings.Global.putInt(context.contentResolver, "low_power", if (saverOn) 1 else 0)
+            } catch (_: Exception) {}
+        }
+
         return true
     }
 
     fun clearAll() {
-        activeSnapshots.clear()
+        // Intentionally does not wipe persisted snapshots: a pending
+        // end-of-window restore must survive app restarts.
     }
 }

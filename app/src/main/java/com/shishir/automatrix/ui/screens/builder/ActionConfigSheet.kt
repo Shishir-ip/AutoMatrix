@@ -214,6 +214,7 @@ fun ActionConfigSheet(
                 ActionType.SET_RINGER_MODE,
                 ActionType.SET_BRIGHTNESS,
                 ActionType.SET_DND_MODE,
+                ActionType.SET_BATTERY_SAVER,
                 ActionType.TOGGLE_FLASHLIGHT
             )
 
@@ -669,7 +670,7 @@ fun ActionConfigSheet(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Toggles the OS battery saver (works on every device). Pair with a Time Window condition to enable it during a period, and another routine with the complementary window to turn it off.",
+                        text = "Toggles the OS battery saver (works on every device). With a Time Window condition it applies for the whole window — turn on 'Restore When Routine Ends' below so it switches back off when the window closes.",
                         style = MaterialTheme.typography.bodySmall,
                         color = glassColors.textSecondary
                     )
